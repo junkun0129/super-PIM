@@ -28,6 +28,7 @@ const SettingPage = () => {
           { key: "1", label: "属性", content: <AttrManage /> },
           { key: "2", label: "カテゴリ", content: <CategoryManage /> },
           { key: "3", label: "ラベル", content: <LabelManage /> },
+          { key: "4", label: "メディア媒体", content: <LabelManage /> },
         ]}
       />
     </div>

@@ -28,6 +28,7 @@ const addAttrToPclApi = ({
       order: attrPclData.length + 1,
       alter_name: "",
       is_show: "1",
+      alter_value: "",
     });
 
     const linkedProducts = productData.filter(

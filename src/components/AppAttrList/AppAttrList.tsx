@@ -143,76 +143,12 @@ const AppAttrList = ({ updateDetail, product }: Props) => {
                 <>
                   {/* Label for the attribute */}
                   {attr.name + "："}
-
-                  {/* Single line input */}
-                  {attr.control_type === INPUT_TYPES.SINGLE_LINE && (
-                    <input
-                      className="input"
-                      name={attr.cd} // Unique name for the attribute
-                      defaultValue={attr.value}
-                    />
-                  )}
-
-                  {/* Multi line input */}
-                  {attr.control_type === INPUT_TYPES.MULTI_LINE && (
-                    <textarea name={attr.cd} defaultValue={attr.value} />
-                  )}
-
-                  {/* Radio input */}
-                  {attr.control_type === INPUT_TYPES.RADIO_INPUT && (
-                    <fieldset name={attr.name}>
-                      {attr.select_list.split(";").map((item, index) => (
-                        <div key={index}>
-                          <input
-                            type="radio"
-                            name={attr.cd} // Group radios by attribute `cd`
-                            id={`${attr.cd}-${index}`} // Unique id for each radio
-                            value={item} // Value for each radio option
-                            defaultChecked={item === attr.value} // Check if it matches current value
-                          />
-                          <label htmlFor={`${attr.cd}-${index}`}>{item}</label>
-                        </div>
-                      ))}
-                    </fieldset>
-                  )}
-
-                  {/* Combo box (select input) */}
-                  {attr.control_type === INPUT_TYPES.COMBO_INPUT && (
-                    <select name={attr.cd} defaultValue={attr.value}>
-                      {attr.select_list.split(";").map((item) => (
-                        <option key={item} value={item}>
-                          {item}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-
-                  {/* Number input */}
-                  {attr.control_type === INPUT_TYPES.NUMBER_INPUT && (
-                    <input
-                      defaultValue={attr.value}
-                      name={attr.cd}
-                      type="number"
-                    />
-                  )}
-
-                  {/* Date input */}
-                  {attr.control_type === INPUT_TYPES.DATE_INPUT && (
-                    <input
-                      type="date"
-                      defaultValue={attr.value}
-                      name={attr.cd}
-                    />
-                  )}
-
-                  {/* CheckBox input */}
-                  {attr.control_type === INPUT_TYPES.CHECKBOX_INPUT && (
-                    <input
-                      type="checkbox"
-                      defaultChecked={attr.value === "1"}
-                      name={attr.cd}
-                    />
-                  )}
+                  {getAttrInput({
+                    cd: attr.cd,
+                    select_list: attr.select_list,
+                    value: attr.value,
+                    control_type: attr.control_type,
+                  })}
                 </>
               )}
             </label>
@@ -225,3 +161,116 @@ const AppAttrList = ({ updateDetail, product }: Props) => {
 };
 
 export default AppAttrList;
+
+export const getAttrInput = ({
+  cd,
+  control_type,
+  value,
+  select_list,
+}: {
+  cd: string;
+  control_type: string;
+  value: string;
+  select_list: string;
+}) => {
+  return (
+    <>
+      {/* Single line input */}
+      {control_type === INPUT_TYPES.SINGLE_LINE && (
+        <input
+          className="input"
+          name={cd} // Unique name for the attribute
+          defaultValue={value}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
+        />
+      )}
+
+      {/* Multi line input */}
+      {control_type === INPUT_TYPES.MULTI_LINE && (
+        <textarea
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
+          name={cd}
+          defaultValue={value}
+        />
+      )}
+
+      {/* Radio input */}
+      {control_type === INPUT_TYPES.RADIO_INPUT && (
+        <fieldset>
+          {select_list.split(";").map((item, index) => (
+            <div key={index}>
+              <input
+                type="radio"
+                name={cd} // Group radios by attribute `cd`
+                id={`${cd}-${index}`} // Unique id for each radio
+                value={item} // Value for each radio option
+                defaultChecked={item === value} // Check if it matches current value
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                }}
+              />
+              <label htmlFor={`${cd}-${index}`}>{item}</label>
+            </div>
+          ))}
+        </fieldset>
+      )}
+
+      {/* Combo box (select input) */}
+      {control_type === INPUT_TYPES.COMBO_INPUT && (
+        <select
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
+          name={cd}
+          defaultValue={value}
+        >
+          {select_list.split(";").map((item) => (
+            <option key={item} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
+      )}
+
+      {/* Number input */}
+      {control_type === INPUT_TYPES.NUMBER_INPUT && (
+        <input
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
+          defaultValue={value}
+          name={cd}
+          type="number"
+        />
+      )}
+
+      {/* Date input */}
+      {control_type === INPUT_TYPES.DATE_INPUT && (
+        <input
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
+          type="date"
+          defaultValue={value}
+          name={cd}
+        />
+      )}
+
+      {/* CheckBox input */}
+      {control_type === INPUT_TYPES.CHECKBOX_INPUT && (
+        <input
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
+          type="checkbox"
+          defaultChecked={value === "1"}
+          name={cd}
+        />
+      )}
+    </>
+  );
+};

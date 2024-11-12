@@ -1,3 +1,4 @@
+import { SAIYOUS_TO_ID } from "../constant";
 import { attributeData } from "../data/attributes/attributes.data";
 import { attrPclData } from "../data/attrpcls/attrpcls";
 import { attrValueData } from "../data/attrvalues/attrvalues";
@@ -45,20 +46,6 @@ export type ProductAttr = {
   select_list: string;
   unit: string;
 };
-
-// export const addSeriesAssetBox = (series_cd: string) => {
-//   return new Promise((resolve, reject) => {
-//     const newSeries = seriesData.map((series, i) => {
-//       if (series.cd === series_cd) {
-//         const newCount = series.asset_box_count + 1;
-//         return { ...series, asset_box_count: newCount };
-//       }
-//       return series;
-//     });
-//     seriesData.splice(0, seriesData.length, ...newSeries);
-//     resolve({ message: "success" });
-//   });
-// };
 
 const getSeriesSkuListApi = ({ series_cd }: { series_cd: string }) => {
   return new Promise((resolve, reject) => {
@@ -175,43 +162,54 @@ const getSeriesListApi = ({
   });
 };
 
+const CREATE_SERIES_REQUIRED_ADD_LIST: { [key: string]: string } = {
+  SERIES_NAME: "series_name",
+  HINBAN: "hinban",
+};
 export const createSeriesApi = ({
   body,
 }: {
   body: {
-    name: string;
-    hinban: string;
+    products: { [key: string]: string }[];
     pcl_cd: string;
   };
 }): Promise<{ message?: string; result: string }> =>
   new Promise((resolve, reject) => {
-    const { name, hinban, pcl_cd } = body;
-    const filtered = productData
-      .filter((item) => item.is_series === "1")
-      .filter((item) => item.hinban === hinban);
-    if (filtered.length) {
-      resolve({ result: "failed", message: "商品コードが既に存在します" });
-    } else {
-      const cd = generateRandomString();
-      const newSeries: ProductTable = {
-        name,
+    const { products, pcl_cd } = body;
+    products.map((product) => {
+      const cd = generateRandomString(17);
+
+      productData.push({
         cd,
-        pcl_cd,
+        name: product[CREATE_SERIES_REQUIRED_ADD_LIST.SERIES_NAME],
+        hinban: product[CREATE_SERIES_REQUIRED_ADD_LIST.HINBAN],
+        is_deleted: "0",
         is_discontinued: "0",
-        acpt_status: "",
+        acpt_last_updated_at: "",
         created_at: new Date().toString(),
         updated_at: "",
-        description: "",
-        hinban,
         labels: "",
-        is_deleted: "0",
         is_series: "1",
-        acpt_last_updated_at: "",
+        pcl_cd,
+        description: "",
         series_cd: "",
-      };
-      productData.push(newSeries);
-      resolve({ result: "success" });
-    }
+        acpt_status: SAIYOUS_TO_ID["仮登録"],
+      });
+
+      Object.entries(product).map(([key, value]) => {
+        if (Object.values(CREATE_SERIES_REQUIRED_ADD_LIST).includes(key))
+          return;
+        const attrvalue_cd = generateRandomString(17);
+        attrValueData.push({
+          cd: attrvalue_cd,
+          value: value,
+          product_cd: cd,
+          attr_cd: key,
+        });
+      });
+    });
+
+    resolve({ result: "success" });
   });
 
 const updateSeriesApi = ({

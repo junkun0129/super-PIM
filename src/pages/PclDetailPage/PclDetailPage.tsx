@@ -8,6 +8,8 @@ import attrApis from "../../api_dev/attrs.api";
 
 import { useMessageContext } from "../../providers/MessageContextProvider";
 import { AttrPclTable } from "../../data/attrpcls/type";
+import AppDropDownList from "../../components/AppDropDownList/AppDropDownList";
+import { getObjectFromRowFormData } from "../../util";
 type Row = {
   cd: string;
   name: string;
@@ -18,12 +20,18 @@ const attrColumnData: Column<Row>[] = [
   { accessor: "cd", header: "項目コード" },
   { accessor: "action", header: "" },
 ];
-
+const dropdownOption: { cd: string; label: string }[] = [
+  { cd: "0", label: "編集" },
+  { cd: "1", label: "削除" },
+];
 const PclDetailPage = () => {
   const { getPclsApi, getPclsAttrsApi, createPclApi, addAttrToPclApi } =
     pclApis;
   const { getAllAttrsApi } = attrApis;
   const [selectedAttr, setselectedAttr] = useState<string | null>(null);
+  const [selectedAttrPcl, setselectedAttrPcl] = useState<AttrPclTable | null>(
+    null
+  );
   const { setMessage } = useMessageContext();
   const [currentPage, setcurrentPage] = useState(1);
   const [pagination, setpagination] = useState(10);
@@ -50,9 +58,21 @@ const PclDetailPage = () => {
     const newDataSource: Row[] = res.data.map((item) => ({
       cd: item.attr_cd,
       name: item.name,
-      action: <div>仮</div>,
+      action: (
+        <AppDropDownList
+          onSelect={(e) => handleSelectOption(e, item)}
+          options={dropdownOption}
+        >
+          <button>：</button>
+        </AppDropDownList>
+      ),
     }));
     setdataSource(newDataSource);
+  };
+  const handleSelectOption = async (key: string, attr: AttrPclTable) => {
+    if (key === "0") {
+      setselectedAttrPcl(attr);
+    }
   };
 
   const handleClickAddButton = async () => {
@@ -77,7 +97,9 @@ const PclDetailPage = () => {
     setisModalOpen(false);
     getPclDetail();
   };
-
+  const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
+    const values = getObjectFromRowFormData(e);
+  };
   return (
     <div>
       <button
@@ -112,6 +134,35 @@ const PclDetailPage = () => {
           </button>
         </div>
       </AppModal>
+      <AppModal open={!!selectedAttrPcl} onClose={() => setselectedAttr(null)}>
+        {selectedAttrPcl && (
+          <form onSubmit={handleUpdate}>
+            {Object.entries(ATTRPCL_TO_LABEL).map(([key, value]) => {
+              if (key === "is_common" || key === "is_show") {
+                return (
+                  <div key={key}>
+                    <label>{value}</label>
+                    <input
+                      type="checkbox"
+                      defaultChecked={
+                        selectedAttrPcl[key] === "1" ? true : false
+                      }
+                    />
+                  </div>
+                );
+              }
+
+              return (
+                <div key={key}>
+                  <label>{value}</label>
+                  <input defaultValue={selectedAttrPcl[key]} />
+                </div>
+              );
+            })}
+            <button type="submit">保存</button>
+          </form>
+        )}
+      </AppModal>
       {dataSource.length && (
         <div>
           <div>商品分類CD:{pcl_cd}</div>
@@ -140,3 +191,9 @@ const PclDetailPage = () => {
 };
 
 export default PclDetailPage;
+
+const ATTRPCL_TO_LABEL = {
+  is_show: "表示",
+  is_common: "必須項目",
+  alter_name: "表示名称",
+};

@@ -67,7 +67,8 @@ const AppDropDownList = ({
             <div
               className="rounded p-3"
               key={i}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 onSelect(option.cd);
                 if (!openProps) {
                   setopen(false);

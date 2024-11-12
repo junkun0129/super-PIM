@@ -16,6 +16,16 @@ export type ProductAttrList = {
   is_common: string;
 };
 
+export type CreateProductAttr = {
+  cd: string;
+  name: string;
+  control_type: string;
+  select_list: string;
+  not_null: string;
+  is_common: string;
+  default_value: string;
+};
+
 const getAllAttrsApi = (): Promise<{
   data: AttributeTable[];
   result: string;
@@ -23,6 +33,44 @@ const getAllAttrsApi = (): Promise<{
 }> => {
   return new Promise((resolve, reject) => {
     resolve({ data: [...attributeData], result: "success" });
+  });
+};
+
+const getProductCreateAttrPclListApi = ({
+  pcl_cd,
+}: {
+  pcl_cd: string;
+}): Promise<{
+  result: string;
+  data: CreateProductAttr[];
+  message?: string;
+}> => {
+  return new Promise((resolve, reject) => {
+    const newCreateProductAttrList: CreateProductAttr[] = attrPclData
+      .filter((item) => item.pcl_cd === pcl_cd)
+      .map((attrpcl) => {
+        const returnValue: CreateProductAttr = {
+          cd: attrpcl.attr_cd,
+          name: "",
+          control_type: "",
+          select_list: "",
+          not_null: "",
+          is_common: attrpcl.is_common,
+          default_value: "",
+        };
+        const attribute = attributeData.find(
+          (item) => item.cd === attrpcl.attr_cd
+        );
+        if (attribute) {
+          returnValue["name"] = attribute.name;
+          returnValue["control_type"] = attribute.control_type;
+          returnValue["not_null"] = attribute.not_null;
+          returnValue["select_list"] = attribute.select_list;
+          returnValue["default_value"] = attribute.default_value;
+        }
+        return returnValue;
+      });
+    resolve({ data: newCreateProductAttrList, result: "success" });
   });
 };
 
@@ -234,4 +282,5 @@ export default {
   updateAttrApi,
   getAttrDetailApi,
   deleteAttrApi,
+  getProductCreateAttrPclListApi,
 };

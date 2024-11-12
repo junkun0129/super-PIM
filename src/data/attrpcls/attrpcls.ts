@@ -8,7 +8,8 @@ export const attrPclData: AttrPclTable[] = [
     is_common: "0",
     attr_cd: "ATTR0011111111111",
     pcl_cd: "PCL001",
-    alter_name: "pcl001alter",
+    alter_name: "",
+    alter_value: "",
   },
   {
     cd: "ATTRPCL002",
@@ -17,7 +18,8 @@ export const attrPclData: AttrPclTable[] = [
     is_common: "1",
     attr_cd: "ATTR0011111111112",
     pcl_cd: "PCL001",
-    alter_name: "pcl002alter",
+    alter_name: "",
+    alter_value: "",
   },
   {
     cd: "ATTRPCL003",
@@ -26,6 +28,7 @@ export const attrPclData: AttrPclTable[] = [
     is_common: "0",
     attr_cd: "ATTR0011111111113",
     pcl_cd: "PCL002",
-    alter_name: "pcl00263lter",
+    alter_name: "",
+    alter_value: "",
   },
 ];
