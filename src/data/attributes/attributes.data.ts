@@ -14,6 +14,7 @@ export const attributeData: AttributeTable[] = [
     unit: "kg",
     created_at: "2023-01-05",
     updated_at: "2023-06-15",
+    is_common: "1",
   },
   {
     cd: "ATTR0011111111112",
@@ -28,6 +29,7 @@ export const attributeData: AttributeTable[] = [
     unit: "",
     created_at: "2023-01-06",
     updated_at: "2023-06-16",
+    is_common: "1",
   },
   {
     cd: "ATTR0011111111113",
@@ -42,5 +44,6 @@ export const attributeData: AttributeTable[] = [
     unit: "W",
     created_at: "2023-01-07",
     updated_at: "2023-06-17",
+    is_common: "0",
   },
 ];

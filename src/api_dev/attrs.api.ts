@@ -55,7 +55,7 @@ const getProductCreateAttrPclListApi = ({
           control_type: "",
           select_list: "",
           not_null: "",
-          is_common: attrpcl.is_common,
+          is_common: "",
           default_value: "",
         };
         const attribute = attributeData.find(
@@ -67,6 +67,7 @@ const getProductCreateAttrPclListApi = ({
           returnValue["not_null"] = attribute.not_null;
           returnValue["select_list"] = attribute.select_list;
           returnValue["default_value"] = attribute.default_value;
+          returnValue["is_common"] = attribute.is_common;
         }
         return returnValue;
       });
@@ -86,6 +87,7 @@ const createAttrApi = ({
     select_list: string;
     default_value: string;
     unit: string;
+    is_common: string;
   };
 }): Promise<{ result: string; massage?: string }> => {
   return new Promise((resolve, reject) => {
@@ -98,6 +100,7 @@ const createAttrApi = ({
       select_list,
       default_value,
       unit,
+      is_common,
     } = body;
     const cd = generateRandomString(35);
     const created_at = new Date().toString();
@@ -114,6 +117,7 @@ const createAttrApi = ({
       default_value,
       unit,
       updated_at: "",
+      is_common,
     };
     attributeData.push(newAttr);
     resolve({ result: "success" });
@@ -229,7 +233,7 @@ const getProductAttrsApi = ({
             control_type: "",
             select_list: "",
             is_show: attrpcl.is_show,
-            is_common: attrpcl.is_common,
+            is_common: "",
           };
 
           const attribute = attributeData.find(
@@ -265,6 +269,7 @@ const getProductAttrsApi = ({
             returnValue["control_type"] = attribute.control_type;
             returnValue["select_list"] = attribute.select_list;
             returnValue["name"] = attribute.name;
+            returnValue["is_common"] = attribute.is_common;
           }
           return returnValue;
         });

@@ -14,18 +14,16 @@ const addAttrToPclApi = ({
   body: {
     attr_cd: string;
     pcl_cd: string;
-    is_common: string;
   };
 }): Promise<{ message?: string; result: string }> => {
   return new Promise((resolve, reject) => {
-    const { attr_cd, pcl_cd, is_common } = body;
+    const { attr_cd, pcl_cd } = body;
     const cd = generateRandomString(35);
     attrPclData.push({
       pcl_cd,
       attr_cd,
       cd,
-      is_common,
-      order: attrPclData.length + 1,
+      order: "",
       alter_name: "",
       is_show: "1",
       alter_value: "",
@@ -110,34 +108,144 @@ const getPclsApi = (): Promise<{
 };
 
 type AttrPclList = AttrPclTable & { name: string };
-const getPclsAttrsApi = (
-  pcl_cd: string
-): Promise<{
+const getPclsAttrsApi = ({
+  body,
+}: {
+  body: {
+    pcl_cd: string;
+    media_cd: string;
+  };
+}): Promise<{
   data: AttrPclList[];
   result: string;
   message?: string;
 }> => {
   return new Promise((resolve, reject) => {
-    const filtered: AttrPclList[] = attrPclData
+    const { pcl_cd, media_cd } = body;
+    const attrPclList: AttrPclList[] = attrPclData
       .filter((item) => item.pcl_cd === pcl_cd)
       .map((item) => {
         let name = "";
-        const filtered = attributeData.filter(
+        const attribute = attributeData.find(
           (attr) => attr.cd === item.attr_cd
         );
-        if (filtered.length) {
-          name = filtered[0].name;
+        if (attribute) {
+          name = attribute.name;
         }
-        return { ...item, name };
+        const alterName = getValueFromPclValue(item.alter_name, media_cd);
+        const alterValue = getValueFromPclValue(item.alter_value, media_cd);
+        const isShow = getValueFromPclValue(item.is_show, media_cd);
+        const order = getValueFromPclValue(item.order, media_cd);
+
+        return {
+          ...item,
+          alter_name: alterName,
+          alter_value: alterValue,
+          is_show: isShow,
+          order,
+          name: attribute.name,
+        };
       });
 
-    resolve({ data: filtered, result: "success" });
+    resolve({ data: attrPclList, result: "success" });
   });
 };
 
+const getValueFromPclValue = (string: string, media_cd: string) => {
+  if (string === "") return "";
+  const mediaCdArray = string.split(";").map((item) => item.split("-")[0]);
+  const matchedIndex = mediaCdArray.findIndex((item) => item === media_cd);
+  if (matchedIndex === -1) return;
+  const value = string.split(";")[matchedIndex].split("-")[1];
+  return value;
+};
+
+const updatePclAttrApi = ({
+  body,
+}: {
+  body: {
+    attrpcls: AttrPclTable[];
+    media_cd: string;
+  };
+}): Promise<{ result: string }> => {
+  return new Promise((resolve, reject) => {
+    const newAttrPcls = attrPclData.map((item) => {
+      const attrPcl = body.attrpcls.find((attrpcl) => attrpcl.cd === item.cd);
+      if (!attrPcl) return item;
+      let newAttrPcl = { ...item };
+
+      if (item.alter_name !== "") {
+        const newvalue = getValueFromPclValueforUpdate(
+          attrPcl.alter_name,
+          body.media_cd,
+          item.alter_name
+        );
+        newAttrPcl["alter_name"] = newvalue;
+      }
+
+      if (item.alter_value !== "") {
+        const newvalue = getValueFromPclValueforUpdate(
+          attrPcl.alter_value,
+          body.media_cd,
+          item.alter_value
+        );
+        newAttrPcl["alter_value"] = newvalue;
+      }
+      if (item.order !== "") {
+        const newvalue = getValueFromPclValueforUpdate(
+          attrPcl.order,
+          body.media_cd,
+          item.order
+        );
+        newAttrPcl["order"] = newvalue;
+      }
+      if (item.is_show !== "") {
+        const newvalue = getValueFromPclValueforUpdate(
+          attrPcl.is_show,
+          body.media_cd,
+          item.is_show
+        );
+        newAttrPcl["is_show"] = newvalue;
+      }
+      return newAttrPcl;
+    });
+    attrPclData.splice(0, newAttrPcls.length, ...newAttrPcls);
+    resolve({ result: "success" });
+  });
+};
+
+const getValueFromPclValueforUpdate = (
+  string: string,
+  media_cd: string,
+  target_vlaue: string
+) => {
+  if (string === "") return `${media_cd}-${target_vlaue}`;
+  const mediaCdArray = string.split(";").map((item) => item.split("-")[0]);
+  const matchedIndex = mediaCdArray.findIndex((item) => item === media_cd);
+  if (matchedIndex === -1) {
+    const newvalue = string + `;${media_cd}-${target_vlaue}`;
+    return newvalue;
+  } else {
+    let newvalue = "";
+    string
+      .split(";")
+      .map((item, i) => {
+        if (i === matchedIndex) {
+          return `${media_cd}-${target_vlaue}`;
+        }
+        return item;
+      })
+      .forEach((item, i) => {
+        if (i === 0) return (newvalue += item);
+        return (newvalue += ";" + item);
+      });
+    return newvalue;
+  }
+};
 export default {
   getPclsAttrsApi,
   addAttrToPclApi,
   createPclApi,
   getPclsApi,
+  updatePclAttrApi,
 };

@@ -3,16 +3,16 @@ import { AppTabProps } from "./type";
 
 const AppTab = ({ data, activeId: activeIdProp, onChange }: AppTabProps) => {
   const [activeId, setactiveId] = useState<string>(activeIdProp ?? "0");
-
+  console.log(data);
   useEffect(() => {
     setactiveId(activeIdProp);
   }, [activeIdProp]);
   const handleClick = (id: string) => {
-    if (activeIdProp) {
-      onChange(id);
-    } else {
+    console.log(id);
+    if (!activeIdProp) {
       setactiveId(id);
     }
+    onChange(id);
   };
   return (
     <div className="w-full h-full">
@@ -24,7 +24,9 @@ const AppTab = ({ data, activeId: activeIdProp, onChange }: AppTabProps) => {
               node.key === activeId ? { backgroundColor: "lightblue" } : {}
             }
             className="border border-indigo-950 p-3"
-            onClick={() => handleClick(i.toString())}
+            onClick={() => {
+              handleClick(node.key);
+            }}
           >
             {node.label}
           </div>

@@ -3,9 +3,9 @@ import { AttrPclTable } from "./type";
 export const attrPclData: AttrPclTable[] = [
   {
     cd: "ATTRPCL001",
-    order: 1,
-    is_show: "1",
-    is_common: "0",
+    order: "0-0",
+    is_show: "",
+
     attr_cd: "ATTR0011111111111",
     pcl_cd: "PCL001",
     alter_name: "",
@@ -13,9 +13,9 @@ export const attrPclData: AttrPclTable[] = [
   },
   {
     cd: "ATTRPCL002",
-    order: 2,
-    is_show: "1",
-    is_common: "1",
+    order: "0-1",
+    is_show: "",
+
     attr_cd: "ATTR0011111111112",
     pcl_cd: "PCL001",
     alter_name: "",
@@ -23,9 +23,9 @@ export const attrPclData: AttrPclTable[] = [
   },
   {
     cd: "ATTRPCL003",
-    order: 3,
-    is_show: "1",
-    is_common: "0",
+    order: "0-1",
+    is_show: "",
+
     attr_cd: "ATTR0011111111113",
     pcl_cd: "PCL002",
     alter_name: "",

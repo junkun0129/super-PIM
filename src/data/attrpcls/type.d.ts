@@ -1,8 +1,8 @@
 export type AttrPclTable = {
   cd: string;
-  order: number;
+  order: string;
   is_show: string;
-  is_common: string;
+
   alter_name: string;
   alter_value: string;
   //AttributeTableのFK

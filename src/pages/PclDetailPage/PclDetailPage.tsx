@@ -10,6 +10,10 @@ import { useMessageContext } from "../../providers/MessageContextProvider";
 import { AttrPclTable } from "../../data/attrpcls/type";
 import AppDropDownList from "../../components/AppDropDownList/AppDropDownList";
 import { getObjectFromRowFormData } from "../../util";
+import mediaApi from "../../api_dev/media.api";
+import { MediaTable } from "../../data/medias/medias";
+import AppTab from "../../components/AppTab/AppTab";
+import { queryParamKey } from "../../routes";
 type Row = {
   cd: string;
   name: string;
@@ -25,8 +29,7 @@ const dropdownOption: { cd: string; label: string }[] = [
   { cd: "1", label: "削除" },
 ];
 const PclDetailPage = () => {
-  const { getPclsApi, getPclsAttrsApi, createPclApi, addAttrToPclApi } =
-    pclApis;
+  const { getPclsAttrsApi, addAttrToPclApi, updatePclAttrApi } = pclApis;
   const { getAllAttrsApi } = attrApis;
   const [selectedAttr, setselectedAttr] = useState<string | null>(null);
   const [selectedAttrPcl, setselectedAttrPcl] = useState<AttrPclTable | null>(
@@ -42,9 +45,20 @@ const PclDetailPage = () => {
   const [isCommon, setisCommon] = useState(false);
   const [searchParams, setSearchPrams] = useSearchParams();
   const pcl_cd = searchParams.get("pc");
+  const { getAllMediaApi } = mediaApi;
+  const [mediaList, setmediaList] = useState<MediaTable[]>([]);
   useEffect(() => {
-    getPclDetail();
+    getMedialist();
   }, []);
+
+  useEffect(() => {
+    console.log(mediaList);
+  }, [mediaList]);
+  useEffect(() => {
+    const media_cd = searchParams.get(queryParamKey.tab);
+    if (!media_cd) return;
+    getPclDetail(media_cd);
+  }, [searchParams]);
 
   useEffect(() => {
     if (attrslist.length === 1) {
@@ -52,8 +66,15 @@ const PclDetailPage = () => {
     }
   }, [attrslist]);
 
-  const getPclDetail = async () => {
-    const res = await getPclsAttrsApi(pcl_cd as string);
+  const getMedialist = async () => {
+    const res = await getAllMediaApi();
+    if (res.result !== "success") return;
+
+    setmediaList([{ cd: "0", name: "商品管理" }, ...res.data]);
+  };
+
+  const getPclDetail = async (media_cd: string) => {
+    const res = await getPclsAttrsApi({ body: { media_cd, pcl_cd } });
     if (res.result !== "success") setMessage("失敗しました");
     const newDataSource: Row[] = res.data.map((item) => ({
       cd: item.attr_cd,
@@ -85,18 +106,7 @@ const PclDetailPage = () => {
     setattrslist(newList);
     setisModalOpen(true);
   };
-  const handleAddAttr = async () => {
-    const res = await addAttrToPclApi({
-      body: {
-        pcl_cd,
-        attr_cd: selectedAttr,
-        is_common: isCommon ? "1" : "0",
-      },
-    });
-
-    setisModalOpen(false);
-    getPclDetail();
-  };
+  const handleAddAttr = async () => {};
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     const values = getObjectFromRowFormData(e);
   };
@@ -126,7 +136,6 @@ const PclDetailPage = () => {
           </select>
           <input
             type="checkbox"
-            value={isCommon}
             onChange={(e) => setisCommon(e.target.checked)}
           />
           <button disabled={!selectedAttr} onClick={() => handleAddAttr()}>
@@ -163,6 +172,16 @@ const PclDetailPage = () => {
           </form>
         )}
       </AppModal>
+      <AppTab
+        onChange={(e) => {
+          setSearchPrams({ ["pc"]: pcl_cd, [queryParamKey.tab]: e });
+        }}
+        data={mediaList.map((item) => ({
+          key: item.cd,
+          label: item.name,
+          content: "",
+        }))}
+      />
       {dataSource.length && (
         <div>
           <div>商品分類CD:{pcl_cd}</div>

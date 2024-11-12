@@ -11,4 +11,5 @@ export type AttributeTable = {
   unit: string;
   created_at: string;
   updated_at: string;
+  is_common: string;
 };
