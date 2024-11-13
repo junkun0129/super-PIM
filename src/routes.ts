@@ -17,4 +17,6 @@ export const paramHolder = {
 export const queryParamKey = {
   detailAttched: "da",
   tab: "tab",
+  pclDetail: "pc",
+  pclDetailMedia: "pm",
 };

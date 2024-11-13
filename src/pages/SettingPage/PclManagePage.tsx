@@ -4,6 +4,7 @@ import AppTable from "../../components/AppTable/AppTable";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import pclApis from "../../api_dev/pcl.api";
 import PclDetailPage from "../PclDetailPage/PclDetailPage";
+import { queryParamKey } from "../../routes";
 type Row = {
   cd: string;
   name: string;
@@ -80,12 +81,12 @@ const PclManagePage = () => {
   );
 
   const handleRowClick = (pcl_id: string) => {
-    setSearchPrams({ ["pc"]: pcl_id });
+    setSearchPrams({ [queryParamKey.pclDetail]: pcl_id });
   };
 
   return (
     <div>
-      {searchParams.get("pc") ? (
+      {searchParams.get(queryParamKey.pclDetail) ? (
         <PclDetailPage />
       ) : (
         <div>

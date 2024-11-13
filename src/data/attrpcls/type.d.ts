@@ -1,6 +1,7 @@
 export type AttrPclTable = {
   cd: string;
   order: string;
+  default_order: number;
   is_show: string;
 
   alter_name: string;

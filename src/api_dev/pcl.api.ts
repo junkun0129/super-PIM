@@ -19,6 +19,7 @@ const addAttrToPclApi = ({
   return new Promise((resolve, reject) => {
     const { attr_cd, pcl_cd } = body;
     const cd = generateRandomString(35);
+    const currentattrpcl = attrPclData.filter((item) => item.pcl_cd === pcl_cd);
     attrPclData.push({
       pcl_cd,
       attr_cd,
@@ -27,6 +28,7 @@ const addAttrToPclApi = ({
       alter_name: "",
       is_show: "1",
       alter_value: "",
+      default_order: currentattrpcl.length,
     });
 
     const linkedProducts = productData.filter(
@@ -139,10 +141,10 @@ const getPclsAttrsApi = ({
 
         return {
           ...item,
-          alter_name: alterName,
-          alter_value: alterValue,
-          is_show: isShow,
-          order,
+          alter_name: alterName ?? "",
+          alter_value: alterValue ?? "",
+          is_show: isShow ?? "1",
+          order: order ?? "",
           name: attribute.name,
         };
       });

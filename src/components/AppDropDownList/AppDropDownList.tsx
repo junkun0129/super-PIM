@@ -43,6 +43,7 @@ const AppDropDownList = ({
       const existingOnClick = child.props.onClick;
       return React.cloneElement(child, {
         onClick: (e: MouseEvent) => {
+          e.stopPropagation();
           handleChildClick();
           if (existingOnClick) {
             existingOnClick(e);
@@ -68,6 +69,7 @@ const AppDropDownList = ({
               className="rounded p-3"
               key={i}
               onClick={(e) => {
+                console.log("object");
                 e.stopPropagation();
                 onSelect(option.cd);
                 if (!openProps) {

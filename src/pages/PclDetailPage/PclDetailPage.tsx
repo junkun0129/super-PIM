@@ -14,15 +14,20 @@ import mediaApi from "../../api_dev/media.api";
 import { MediaTable } from "../../data/medias/medias";
 import AppTab from "../../components/AppTab/AppTab";
 import { queryParamKey } from "../../routes";
+import AlterValueInput from "./AlterValueInput";
 type Row = {
   cd: string;
   name: string;
-  action: JSX.Element;
+  alter_name: JSX.Element;
+  alter_value: JSX.Element;
+  order: number;
+  is_show: JSX.Element;
 };
 const attrColumnData: Column<Row>[] = [
   { accessor: "name", header: "項目名" },
-  { accessor: "cd", header: "項目コード" },
-  { accessor: "action", header: "" },
+  { accessor: "alter_name", header: "表示名" },
+  { accessor: "alter_value", header: "表示値" },
+  { accessor: "is_show", header: "表示・非表示設定" },
 ];
 const dropdownOption: { cd: string; label: string }[] = [
   { cd: "0", label: "編集" },
@@ -30,41 +35,30 @@ const dropdownOption: { cd: string; label: string }[] = [
 ];
 const PclDetailPage = () => {
   const { getPclsAttrsApi, addAttrToPclApi, updatePclAttrApi } = pclApis;
-  const { getAllAttrsApi } = attrApis;
-  const [selectedAttr, setselectedAttr] = useState<string | null>(null);
-  const [selectedAttrPcl, setselectedAttrPcl] = useState<AttrPclTable | null>(
-    null
-  );
+
   const { setMessage } = useMessageContext();
   const [currentPage, setcurrentPage] = useState(1);
   const [pagination, setpagination] = useState(10);
   const [total, settotal] = useState(0);
   const [dataSource, setdataSource] = useState<Row[]>([]);
   const [attrslist, setattrslist] = useState([]);
-  const [isModalOpen, setisModalOpen] = useState(false);
-  const [isCommon, setisCommon] = useState(false);
   const [searchParams, setSearchPrams] = useSearchParams();
-  const pcl_cd = searchParams.get("pc");
+  const pcl_cd = searchParams.get(queryParamKey.pclDetail);
   const { getAllMediaApi } = mediaApi;
+  const [alterValueOptions, setalterValueOptions] = useState<
+    { cd: string; label: string }[]
+  >([]);
+
   const [mediaList, setmediaList] = useState<MediaTable[]>([]);
   useEffect(() => {
     getMedialist();
   }, []);
 
   useEffect(() => {
-    console.log(mediaList);
-  }, [mediaList]);
-  useEffect(() => {
-    const media_cd = searchParams.get(queryParamKey.tab);
+    const media_cd = searchParams.get(queryParamKey.pclDetailMedia);
     if (!media_cd) return;
-    getPclDetail(media_cd);
+    getPclDetail(media_cd, pcl_cd);
   }, [searchParams]);
-
-  useEffect(() => {
-    if (attrslist.length === 1) {
-      setselectedAttr(attrslist[0].cd);
-    }
-  }, [attrslist]);
 
   const getMedialist = async () => {
     const res = await getAllMediaApi();
@@ -73,43 +67,43 @@ const PclDetailPage = () => {
     setmediaList([{ cd: "0", name: "商品管理" }, ...res.data]);
   };
 
-  const getPclDetail = async (media_cd: string) => {
+  const getPclDetail = async (media_cd: string, pcl_cd: string) => {
     const res = await getPclsAttrsApi({ body: { media_cd, pcl_cd } });
     if (res.result !== "success") setMessage("失敗しました");
+    const newAlterValueOptions = res.data.map((item) => ({
+      cd: item.attr_cd,
+      label: item.name,
+    }));
+    setalterValueOptions(newAlterValueOptions);
+
     const newDataSource: Row[] = res.data.map((item) => ({
       cd: item.attr_cd,
       name: item.name,
-      action: (
-        <AppDropDownList
-          onSelect={(e) => handleSelectOption(e, item)}
-          options={dropdownOption}
-        >
-          <button>：</button>
-        </AppDropDownList>
+      alter_name: (
+        <input
+          name={item.attr_cd + "-alter_name"}
+          key={item.cd + media_cd}
+          defaultValue={item.alter_name}
+        />
+      ),
+      alter_value: (
+        <AlterValueInput
+          options={[...newAlterValueOptions, { cd: "text", label: "テキスト" }]}
+          defaultValue={item.alter_value}
+        />
+      ),
+      order: parseInt(item.order),
+      is_show: (
+        <input
+          name={item.attr_cd + "-is_show"}
+          key={item.cd + media_cd}
+          type="checkbox"
+        />
       ),
     }));
     setdataSource(newDataSource);
   };
-  const handleSelectOption = async (key: string, attr: AttrPclTable) => {
-    if (key === "0") {
-      setselectedAttrPcl(attr);
-    }
-  };
 
-  const handleClickAddButton = async () => {
-    const res = await getAllAttrsApi();
-    if (res.result !== "success") return setMessage("失敗しました");
-    const newList = res.data.filter(
-      (item) => !dataSource.map((item) => item.cd).includes(item.cd)
-    );
-    if (!newList.length) return setMessage("追加できる項目はありません");
-    setattrslist(newList);
-    setisModalOpen(true);
-  };
-  const handleAddAttr = async () => {};
-  const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
-    const values = getObjectFromRowFormData(e);
-  };
   return (
     <div>
       <button
@@ -119,62 +113,11 @@ const PclDetailPage = () => {
       >
         戻る
       </button>
-      <button onClick={handleClickAddButton}>作成</button>
-      <AppModal onClose={() => setisModalOpen(false)} open={isModalOpen}>
-        <div>
-          <select
-            value={selectedAttr}
-            onChange={(e) => {
-              setselectedAttr(e.target.value); // Update the selected attribute
-            }}
-          >
-            {attrslist.map((attr, i) => (
-              <option key={i} value={attr.cd}>
-                {attr.name}
-              </option>
-            ))}
-          </select>
-          <input
-            type="checkbox"
-            onChange={(e) => setisCommon(e.target.checked)}
-          />
-          <button disabled={!selectedAttr} onClick={() => handleAddAttr()}>
-            追加
-          </button>
-        </div>
-      </AppModal>
-      <AppModal open={!!selectedAttrPcl} onClose={() => setselectedAttr(null)}>
-        {selectedAttrPcl && (
-          <form onSubmit={handleUpdate}>
-            {Object.entries(ATTRPCL_TO_LABEL).map(([key, value]) => {
-              if (key === "is_common" || key === "is_show") {
-                return (
-                  <div key={key}>
-                    <label>{value}</label>
-                    <input
-                      type="checkbox"
-                      defaultChecked={
-                        selectedAttrPcl[key] === "1" ? true : false
-                      }
-                    />
-                  </div>
-                );
-              }
 
-              return (
-                <div key={key}>
-                  <label>{value}</label>
-                  <input defaultValue={selectedAttrPcl[key]} />
-                </div>
-              );
-            })}
-            <button type="submit">保存</button>
-          </form>
-        )}
-      </AppModal>
       <AppTab
         onChange={(e) => {
-          setSearchPrams({ ["pc"]: pcl_cd, [queryParamKey.tab]: e });
+          searchParams.set(queryParamKey.pclDetailMedia, e);
+          setSearchPrams(searchParams);
         }}
         data={mediaList.map((item) => ({
           key: item.cd,
@@ -182,28 +125,28 @@ const PclDetailPage = () => {
           content: "",
         }))}
       />
-      {dataSource.length && (
-        <div>
-          <div>商品分類CD:{pcl_cd}</div>
+      {!!dataSource.length &&
+        searchParams.get(queryParamKey.pclDetailMedia) && (
           <div>
-            <AppTable
-              data={dataSource}
-              columns={attrColumnData}
-              onRowClick={function (id: string): void {
-                throw new Error("Function not implemented.");
-              }}
-              currentPage={currentPage}
-              pagination={pagination}
-              total={total}
-              onCurrentPageChange={function (page: number): void {
-                throw new Error("Function not implemented.");
-              }}
-              onPaginationChange={function (pagination: number): void {
-                throw new Error("Function not implemented.");
-              }}
-            />
+            <div>商品分類CD:{pcl_cd}</div>
+            <div>
+              <AppTable
+                data={dataSource}
+                columns={attrColumnData}
+                onRowClick={function (id: string): void {
+                  throw new Error("Function not implemented.");
+                }}
+                currentPage={currentPage}
+                pagination={pagination}
+                total={total}
+                onCurrentPageChange={() => console.log("")}
+                onPaginationChange={() => console.log("")}
+              />
+            </div>
           </div>
-        </div>
+        )}
+      {!searchParams.get(queryParamKey.pclDetailMedia) && (
+        <div>メディアを選択してください</div>
       )}
     </div>
   );
