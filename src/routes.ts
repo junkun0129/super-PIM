@@ -1,11 +1,11 @@
 export const AppRoutes = {
-  serisListPage: "/app/series",
-  seriesDetailPage: "/app/seriesdetail/:series_cd",
-  seriesCreatePage: "/app/seriescreate",
-  pclMainPage: "/app/pcl",
-  pclDetailPage: "/app/pcl/detail/:pcl_cd",
-  skuDetailPage: "/app/sku/detail/:sku_cd",
-  settingPage: "/app/setting",
+  serisListPage: "/main",
+  seriesDetailPage: "/seriesdetail/:series_cd",
+  seriesCreatePage: "/seriescreate",
+  pclMainPage: "/pcl",
+  pclDetailPage: "/pcl/detail/:pcl_cd",
+  skuDetailPage: "/sku/detail/:sku_cd",
+  settingPage: "/setting",
 };
 
 export const paramHolder = {
@@ -19,4 +19,5 @@ export const queryParamKey = {
   tab: "tab",
   pclDetail: "pc",
   pclDetailMedia: "pm",
+  mediaSelected: "ms",
 };

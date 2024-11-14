@@ -26,7 +26,7 @@ function App() {
       <MessageContextProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/app" element={<AppLayout />}>
+            <Route path="/" element={<AppLayout />}>
               <Route path={AppRoutes.serisListPage} element={<MainPage />} />
               <Route
                 path={AppRoutes.seriesDetailPage}

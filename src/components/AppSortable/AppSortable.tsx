@@ -1,70 +1,82 @@
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 type Props = {
   children: JSX.Element[];
-  onDragEnd: (a: { activeId: string; overId: string }) => void;
+
+  layerCd: string;
+  onDrop?: ({ activeCd, overCd }: { activeCd: string; overCd: string }) => void;
 };
-const AppSortable = ({ children, onDragEnd }: Props) => {
-  const [activeId, setactiveId] = useState("");
-  const activeIdRef = useRef(activeId);
+const AppSortable = ({ children, layerCd, onDrop }: Props) => {
+  const [activeCd, setactiveCd] = useState<string | null>(null);
+  const [overCd, setoverCd] = useState<string | null>(null);
 
-  // Update the ref value whenever activeId changes
-  useEffect(() => {
-    activeIdRef.current = activeId;
-  }, [activeId]);
+  const dragstart_handler = (
+    event: React.DragEvent<HTMLTableCellElement>,
+    newActiveCd: string
+  ) => {
+    setactiveCd(newActiveCd);
+  };
 
-  function dragstart_handler(ev: DragEvent) {
-    // 対象となる要素の id を DataTransfer オブジェクトに追加する
-    const div: HTMLElement = ev.target;
-    const ii = div.getElementsByClassName("drag-node");
-    if (ii.length) {
-      const name = ii[0].id;
-      setactiveId(name);
+  function dragover_handler(
+    event: React.DragEvent<HTMLTableCellElement>,
+    newOverCd: string
+  ) {
+    event.preventDefault();
+    setoverCd(newOverCd);
+  }
+
+  const drop_handler = (
+    event: React.DragEvent<HTMLTableCellElement>,
+    cd: string
+  ) => {
+    const div = event.view.document.getElementsByClassName(cd);
+    if (div && div.length > 0) {
+      (div[0] as HTMLElement).style.backgroundColor = "";
+      const isOk = (div[0] as HTMLElement).className.includes(layerCd);
+      if (activeCd && overCd && isOk) {
+        onDrop({ activeCd, overCd });
+      }
     }
 
-    ev.dataTransfer.setData("text", "s");
-    ev.dataTransfer.effectAllowed = "move";
-  }
-  function dragover_handler(ev) {
-    ev.preventDefault();
-    ev.dataTransfer.dropEffect = "move";
-  }
-  function drop_handler(ev: DragEvent) {
-    ev.preventDefault();
-    // 移動された要素の id を取得して、その要素を target の DOM に追加する
-    const data = ev.dataTransfer.getData("text");
-    onDragEnd({
-      activeId: activeIdRef.current ?? "",
-      overId: getTargetElement(ev.target).id,
-    });
-    setactiveId("");
-    // ev.target.appendChild(document.getElementById(data));
-  }
-  const dragenter_handler = (ev) => {
-    const dragNode = getTargetElement(ev.target);
-    dragNode.style.backgroundColor = "red";
+    setactiveCd(null);
+    setoverCd(null);
   };
-  const dragleave_handler = (ev) => {
-    const dragNode = getTargetElement(ev.target);
-    dragNode.style.backgroundColor = "";
-  };
-  const getTargetElement = (element: HTMLElement) => {
-    if (element.className.includes("drag-node")) {
-      return element;
-    } else {
-      return getTargetElement(element.parentElement);
+
+  const dragenter_handler = (
+    event: React.DragEvent<HTMLTableCellElement>,
+    cd: string
+  ) => {
+    const div = event.view.document.getElementsByClassName(cd);
+    if (div && div.length > 0) {
+      const isOk = (div[0] as HTMLElement).className.includes(layerCd);
+      if (!isOk) return;
+      (div[0] as HTMLElement).style.backgroundColor = "lightblue";
     }
   };
+
+  const dragleave_handler = (
+    event: React.DragEvent<HTMLTableCellElement>,
+    cd: string
+  ) => {
+    const div = event.view.document.getElementsByClassName(cd);
+    if (div && div.length > 0) {
+      const isOk = (div[0] as HTMLElement).className.includes(layerCd);
+      if (!isOk) return;
+      (div[0] as HTMLElement).style.backgroundColor = "";
+    }
+  };
+
   return (
     <div>
-      {children.map((Item) => {
+      {children.map((Item, i) => {
         return (
           <div
+            className={`sortable ${layerCd} ${Item.key}`}
             draggable="true"
-            onDragStart={dragstart_handler}
-            onDrop={drop_handler}
-            onDragOver={dragover_handler}
-            onDragEnter={dragenter_handler}
-            onDragLeave={dragleave_handler}
+            onDragStart={(e: any) => dragstart_handler(e, Item.key)}
+            onDrop={(e: any) => drop_handler(e, Item.key)}
+            onDragOver={(e: any) => dragover_handler(e, Item.key)}
+            onDragEnter={(e: any) => dragenter_handler(e, Item.key)}
+            onDragLeave={(e: any) => dragleave_handler(e, Item.key)}
           >
             {Item}
           </div>

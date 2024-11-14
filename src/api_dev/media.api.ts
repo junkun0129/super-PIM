@@ -25,6 +25,7 @@ const createMediaApi = ({
       return returnValue;
     });
     attrPclData.splice(0, newAttrPclData.length, ...newAttrPclData);
+    console.log(attrPclData);
     resolve({ result: "success" });
   });
 };

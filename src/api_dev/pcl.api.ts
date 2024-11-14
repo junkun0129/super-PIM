@@ -148,7 +148,7 @@ const getPclsAttrsApi = ({
           name: attribute.name,
         };
       });
-
+    console.log(attrPclList);
     resolve({ data: attrPclList, result: "success" });
   });
 };
@@ -166,51 +166,60 @@ const updatePclAttrApi = ({
   body,
 }: {
   body: {
-    attrpcls: AttrPclTable[];
+    attrpcls: {
+      alter_name: string;
+      alter_value: string;
+      order: string;
+      is_show: string;
+      cd: string;
+    }[];
     media_cd: string;
   };
 }): Promise<{ result: string }> => {
   return new Promise((resolve, reject) => {
+    console.log(body.attrpcls);
     const newAttrPcls = attrPclData.map((item) => {
       const attrPcl = body.attrpcls.find((attrpcl) => attrpcl.cd === item.cd);
       if (!attrPcl) return item;
       let newAttrPcl = { ...item };
 
-      if (item.alter_name !== "") {
+      if (attrPcl.alter_name !== "") {
         const newvalue = getValueFromPclValueforUpdate(
-          attrPcl.alter_name,
+          item.alter_name,
           body.media_cd,
-          item.alter_name
+          attrPcl.alter_name
         );
+        console.log(newvalue, "newvalue");
         newAttrPcl["alter_name"] = newvalue;
       }
 
-      if (item.alter_value !== "") {
+      if (attrPcl.alter_value !== "") {
         const newvalue = getValueFromPclValueforUpdate(
-          attrPcl.alter_value,
+          item.alter_value,
           body.media_cd,
-          item.alter_value
+          attrPcl.alter_value
         );
         newAttrPcl["alter_value"] = newvalue;
       }
-      if (item.order !== "") {
+      if (attrPcl.order !== "") {
         const newvalue = getValueFromPclValueforUpdate(
-          attrPcl.order,
+          item.order,
           body.media_cd,
-          item.order
+          attrPcl.order
         );
         newAttrPcl["order"] = newvalue;
       }
-      if (item.is_show !== "") {
+      if (attrPcl.is_show !== "") {
         const newvalue = getValueFromPclValueforUpdate(
-          attrPcl.is_show,
+          item.is_show,
           body.media_cd,
-          item.is_show
+          attrPcl.is_show
         );
         newAttrPcl["is_show"] = newvalue;
       }
       return newAttrPcl;
     });
+    console.log(newAttrPcls);
     attrPclData.splice(0, newAttrPcls.length, ...newAttrPcls);
     resolve({ result: "success" });
   });
@@ -223,6 +232,7 @@ const getValueFromPclValueforUpdate = (
 ) => {
   if (string === "") return `${media_cd}-${target_vlaue}`;
   const mediaCdArray = string.split(";").map((item) => item.split("-")[0]);
+
   const matchedIndex = mediaCdArray.findIndex((item) => item === media_cd);
   if (matchedIndex === -1) {
     const newvalue = string + `;${media_cd}-${target_vlaue}`;

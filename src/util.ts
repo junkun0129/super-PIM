@@ -14,6 +14,21 @@ export function generateRandomString(length: number = 35) {
 export function getSeriesImg(fileName: string) {
   return "/img/series/" + fileName;
 }
+export function arrayMove(array: any[], fromIndex: number, toIndex: number) {
+  // 配列が空でないこと、インデックスが有効であることを確認
+  if (fromIndex === toIndex) return array; // 同じ位置であれば変更しない
+
+  // 配列をコピーしてから処理を行う
+  const newArray = [...array];
+
+  // 取り出すアイテム
+  const [movedItem] = newArray.splice(fromIndex, 1);
+
+  // 新しい位置に挿入
+  newArray.splice(toIndex, 0, movedItem);
+
+  return newArray;
+}
 
 export function buildCategoryTree(categories: CategoryTable[]): CategoryNode[] {
   const categoryMap: { [cd: string]: CategoryNode } = {};

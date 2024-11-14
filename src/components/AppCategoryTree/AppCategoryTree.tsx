@@ -7,7 +7,11 @@ import AppSortable from "../AppSortable/AppSortable";
 type Props = {
   node: CategoryNode;
   updateCategoryTree: () => void;
-  updateOrder: (a: { activeId: string; overId: string }) => void;
+  updateOrder: (a: {
+    activeCd: string;
+    overCd: string;
+    parent_cd: string;
+  }) => void;
 };
 const AppCategoryTree = ({ node, updateCategoryTree, updateOrder }: Props) => {
   const [isOpen, setisOpen] = useState(false);
@@ -80,7 +84,12 @@ const AppCategoryTree = ({ node, updateCategoryTree, updateOrder }: Props) => {
           </div>
         )}
         {isOpen && !!node.children.length && (
-          <AppSortable onDragEnd={updateOrder}>
+          <AppSortable
+            layerCd={node.cd}
+            onDrop={({ activeCd, overCd }) =>
+              updateOrder({ activeCd, overCd, parent_cd: node.cd })
+            }
+          >
             {node.children.map((child, i) => (
               <div key={i}>
                 <AppCategoryTree

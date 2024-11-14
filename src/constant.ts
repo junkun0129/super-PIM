@@ -123,6 +123,7 @@ export const SERIES_ATTRIBUTE = {
   option3: "",
   transformation: null,
 };
+export const mater_media_cd = "0";
 
 const DEFAULT_SYSTEM_CATEGORY_CODE = "00000000000000000000000000";
 

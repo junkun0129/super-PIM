@@ -21,16 +21,19 @@ const CategoryManage = () => {
   };
 
   const updateOrder = async ({
-    activeId,
-    overId,
+    activeCd,
+    overCd,
+    parent_cd,
   }: {
-    activeId: string;
-    overId: string;
+    activeCd: string;
+    overCd: string;
+    parent_cd: string;
   }) => {
     const res = await updateCategoryOrderApi({
       body: {
-        active_cd: activeId,
-        over_cd: overId,
+        active_cd: activeCd,
+        over_cd: overCd,
+        parent_cd,
       },
     });
     if (res.result !== "success") return;
@@ -40,7 +43,12 @@ const CategoryManage = () => {
   return (
     <div>
       {categories.length && (
-        <AppSortable onDragEnd={updateOrder}>
+        <AppSortable
+          layerCd="rootcategory"
+          onDrop={({ activeCd, overCd }) =>
+            updateOrder({ activeCd, overCd, parent_cd: "" })
+          }
+        >
           {categories.map((child, i) => (
             <div key={child.cd} className="draggable">
               <AppCategoryTree

@@ -13,6 +13,8 @@ export type TableProps<T extends Object> = {
   onRowClickKey?: keyof T;
   onCurrentPageChange: (page: number) => void;
   onPaginationChange: (pagination: number) => void;
+  draggableAccesor?: keyof T;
+  onDrop?: ({ activeCd, overCd }: { activeCd: string; overCd: string }) => void;
 };
 
 export type PageSetting = {

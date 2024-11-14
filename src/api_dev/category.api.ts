@@ -2,6 +2,7 @@ import { categoriesData } from "../data/categories/categories.data";
 import { CategoryNode, CategoryTable } from "../data/categories/type";
 import { productCategoryData } from "../data/productcategories/productcategories.data";
 import {
+  arrayMove,
   buildCategoryTree,
   generateRandomString,
   getCategoryTreeByCd,
@@ -116,43 +117,34 @@ const updateCategoryOrderApi = ({
   body: {
     active_cd: string;
     over_cd: string;
+    parent_cd: string;
   };
 }): Promise<{ result: string }> => {
   return new Promise((resolve, reject) => {
-    const { active_cd, over_cd } = body;
-    const overCategory = categoriesData.find((item) => item.cd === over_cd);
-    const activeCategory = categoriesData.find((item) => item.cd === active_cd);
+    const { active_cd, over_cd, parent_cd } = body;
+    const nodeCategories = categoriesData.filter(
+      (item) => item.parent_cd === parent_cd
+    );
+    const restCategories = categoriesData.filter(
+      (item) => item.parent_cd !== parent_cd
+    );
+    const overIndex = nodeCategories.findIndex((item) => item.cd === over_cd);
+    const activeIndex = nodeCategories.findIndex(
+      (item) => item.cd === active_cd
+    );
 
-    if (!overCategory || !activeCategory) return reject("Category not found");
-
-    const overOrder = overCategory.order;
-    const activeOrder = activeCategory.order;
+    if (!overIndex || !activeIndex) return reject("Category not found");
 
     // 上から下に移動する場合と下から上に移動する場合で処理を分ける
-    const newCategory = categoriesData.map((category) => {
-      if (category.cd === active_cd) {
-        // active_cdを移動先の順序に設定
-        return { ...category, order: overOrder };
-      } else if (activeOrder < overOrder) {
-        // 上から下に移動: activeOrder < overOrder
-        if (category.order > activeOrder && category.order <= overOrder) {
-          return { ...category, order: category.order - 1 };
-        }
-      } else {
-        // 下から上に移動: activeOrder > overOrder
-        if (category.order >= overOrder && category.order < activeOrder) {
-          return { ...category, order: category.order + 1 };
-        }
-      }
-      return category;
-    });
+    const newNodecateogy = arrayMove(
+      nodeCategories,
+      activeIndex,
+      overIndex
+    ).sort((a, b) => a.order - b.order);
+    const newCategories = [...newNodecateogy, ...restCategories];
 
     // categoriesDataを更新
-    categoriesData.splice(
-      0,
-      categoriesData.length,
-      ...newCategory.sort((a, b) => a.order - b.order)
-    );
+    categoriesData.splice(0, newCategories.length, ...newCategories);
     resolve({ result: "success" });
   });
 };

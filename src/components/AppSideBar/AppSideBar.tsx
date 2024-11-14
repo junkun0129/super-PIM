@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AppRoutes } from "../../routes";
+import { AppRoutes, queryParamKey } from "../../routes";
 import mediaApis from "../../api_dev/media.api";
 import { getObjectFromRowFormData } from "../../util";
 import { MediaTable } from "../../data/medias/medias";
+import SeriesListPage from "../../pages/SeriesListPage.tsx/SeriesListPage";
 
 const AppSideBar = () => {
   const navigate = useNavigate();
@@ -47,7 +48,11 @@ const AppSideBar = () => {
         const newMediaItems = res.data.map((item) => ({
           key: "media-" + item.cd,
           label: item.name,
-          onClick: () => {},
+          onClick: () => {
+            navigate(
+              `${AppRoutes.serisListPage}?${queryParamKey.mediaSelected}=${item.cd}&${queryParamKey.tab}=0`
+            );
+          },
         }));
         setsidebarItems([...baseSidebarItems, ...newMediaItems, addItem]);
       } else {
