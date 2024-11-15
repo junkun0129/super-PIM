@@ -16,6 +16,7 @@ const CategoryManage = () => {
 
   const getCategories = async () => {
     const res = await getAllCategoriesApi();
+
     if (res.result !== "success") return;
     setcategories(res.data);
   };
@@ -29,6 +30,7 @@ const CategoryManage = () => {
     overCd: string;
     parent_cd: string;
   }) => {
+    console.log(parent_cd, overCd, activeCd);
     const res = await updateCategoryOrderApi({
       body: {
         active_cd: activeCd,

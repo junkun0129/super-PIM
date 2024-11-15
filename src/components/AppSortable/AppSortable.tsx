@@ -13,6 +13,7 @@ const AppSortable = ({ children, layerCd, onDrop }: Props) => {
     event: React.DragEvent<HTMLTableCellElement>,
     newActiveCd: string
   ) => {
+    event.stopPropagation();
     setactiveCd(newActiveCd);
   };
 
@@ -21,19 +22,25 @@ const AppSortable = ({ children, layerCd, onDrop }: Props) => {
     newOverCd: string
   ) {
     event.preventDefault();
+    event.stopPropagation();
     setoverCd(newOverCd);
   }
 
   const drop_handler = (
     event: React.DragEvent<HTMLTableCellElement>,
-    cd: string
+    cd: string,
+    active_cd: string,
+    over_cd: string
   ) => {
+    event.stopPropagation();
     const div = event.view.document.getElementsByClassName(cd);
     if (div && div.length > 0) {
       (div[0] as HTMLElement).style.backgroundColor = "";
       const isOk = (div[0] as HTMLElement).className.includes(layerCd);
-      if (activeCd && overCd && isOk) {
-        onDrop({ activeCd, overCd });
+      console.log(isOk);
+      if (active_cd && over_cd && isOk) {
+        console.log("object");
+        onDrop({ activeCd: active_cd, overCd: over_cd });
       }
     }
 
@@ -45,6 +52,7 @@ const AppSortable = ({ children, layerCd, onDrop }: Props) => {
     event: React.DragEvent<HTMLTableCellElement>,
     cd: string
   ) => {
+    event.stopPropagation();
     const div = event.view.document.getElementsByClassName(cd);
     if (div && div.length > 0) {
       const isOk = (div[0] as HTMLElement).className.includes(layerCd);
@@ -57,6 +65,7 @@ const AppSortable = ({ children, layerCd, onDrop }: Props) => {
     event: React.DragEvent<HTMLTableCellElement>,
     cd: string
   ) => {
+    event.stopPropagation();
     const div = event.view.document.getElementsByClassName(cd);
     if (div && div.length > 0) {
       const isOk = (div[0] as HTMLElement).className.includes(layerCd);
@@ -73,7 +82,7 @@ const AppSortable = ({ children, layerCd, onDrop }: Props) => {
             className={`sortable ${layerCd} ${Item.key}`}
             draggable="true"
             onDragStart={(e: any) => dragstart_handler(e, Item.key)}
-            onDrop={(e: any) => drop_handler(e, Item.key)}
+            onDrop={(e: any) => drop_handler(e, Item.key, activeCd, overCd)}
             onDragOver={(e: any) => dragover_handler(e, Item.key)}
             onDragEnter={(e: any) => dragenter_handler(e, Item.key)}
             onDragLeave={(e: any) => dragleave_handler(e, Item.key)}

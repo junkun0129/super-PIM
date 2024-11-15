@@ -55,6 +55,7 @@ const AppCategoryTree = ({ node, updateCategoryTree, updateOrder }: Props) => {
       window.removeEventListener("mousedown", handleClose);
     }
   }, [open]);
+
   const handleClose = (e: MouseEvent) => {
     if (ref.current && !ref.current.contains(e.target as Node)) {
       setisAdd(false);
@@ -86,12 +87,12 @@ const AppCategoryTree = ({ node, updateCategoryTree, updateOrder }: Props) => {
         {isOpen && !!node.children.length && (
           <AppSortable
             layerCd={node.cd}
-            onDrop={({ activeCd, overCd }) =>
-              updateOrder({ activeCd, overCd, parent_cd: node.cd })
-            }
+            onDrop={({ activeCd, overCd }) => {
+              updateOrder({ activeCd, overCd, parent_cd: node.cd });
+            }}
           >
             {node.children.map((child, i) => (
-              <div key={i}>
+              <div key={child.cd}>
                 <AppCategoryTree
                   updateCategoryTree={updateCategoryTree}
                   key={child.cd + i}

@@ -122,9 +122,9 @@ const updateCategoryOrderApi = ({
 }): Promise<{ result: string }> => {
   return new Promise((resolve, reject) => {
     const { active_cd, over_cd, parent_cd } = body;
-    const nodeCategories = categoriesData.filter(
-      (item) => item.parent_cd === parent_cd
-    );
+    const nodeCategories = categoriesData
+      .filter((item) => item.parent_cd === parent_cd)
+      .sort((a, b) => a.order - b.order);
     const restCategories = categoriesData.filter(
       (item) => item.parent_cd !== parent_cd
     );
@@ -133,17 +133,16 @@ const updateCategoryOrderApi = ({
       (item) => item.cd === active_cd
     );
 
-    if (!overIndex || !activeIndex) return reject("Category not found");
+    if (overIndex === -1 || activeIndex === -1)
+      return reject("Category not found");
 
-    // 上から下に移動する場合と下から上に移動する場合で処理を分ける
     const newNodecateogy = arrayMove(
       nodeCategories,
       activeIndex,
       overIndex
-    ).sort((a, b) => a.order - b.order);
+    ).map((item, i) => ({ ...item, order: i }));
     const newCategories = [...newNodecateogy, ...restCategories];
 
-    // categoriesDataを更新
     categoriesData.splice(0, newCategories.length, ...newCategories);
     resolve({ result: "success" });
   });
