@@ -11,7 +11,7 @@ import { useMessageContext } from "../../providers/MessageContextProvider";
 import SkuListPage from "../SkuListPage/SkuListPage";
 import AppAttrList from "../../components/AppAttrList/AppAttrList";
 import AppAssetList from "../../components/AppAssetList/AppAssetList";
-import { queryParamKey } from "../../routes";
+import { AppRoutes, paramHolder, queryParamKey } from "../../routes";
 const SeriesDetailPage = () => {
   const { getSeriesDetailApi, getSeriesSkuListApi, updateSeriesApi } =
     seriesApis;
@@ -77,11 +77,14 @@ const SeriesDetailPage = () => {
   }, [series]);
 
   const handleBackClick = () => {
-    navigate("/app/series?tab=0");
+    const media_cd = searchParams.get(queryParamKey.mediaSelected);
+    const url = `${AppRoutes.serisListPage}?${queryParamKey.mediaSelected}=${media_cd}`;
+    navigate(url);
   };
 
   const handleTabKey = (e: string) => {
-    setSearchParams({ ["tab"]: e });
+    searchParams.set(queryParamKey.tab, e);
+    setSearchParams(searchParams);
   };
 
   const handleCategorybuttonClick = async () => {
@@ -127,6 +130,7 @@ const SeriesDetailPage = () => {
     getCategory();
     setMessage("シリーズの更新に成功しました");
   };
+
   return (
     <div>
       <button onClick={handleBackClick}>←</button>

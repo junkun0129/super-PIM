@@ -8,7 +8,7 @@ export type ProductTable = {
   created_at: string;
   updated_at: string;
   hinban: string;
-
+  medias: string;
   is_deleted: string;
   is_series: string;
   series_cd: string;

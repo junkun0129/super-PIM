@@ -3,7 +3,7 @@ import { AppTabProps } from "./type";
 
 const AppTab = ({ data, activeId: activeIdProp, onChange }: AppTabProps) => {
   const [activeId, setactiveId] = useState<string>(activeIdProp ?? "0");
-  console.log(data);
+
   useEffect(() => {
     setactiveId(activeIdProp);
   }, [activeIdProp]);
@@ -20,10 +20,13 @@ const AppTab = ({ data, activeId: activeIdProp, onChange }: AppTabProps) => {
       <div className="flex">
         {data.map((node, i) => (
           <div
-            style={
-              node.key === activeId ? { backgroundColor: "lightblue" } : {}
-            }
-            className="border border-indigo-950 p-3"
+            key={i}
+            style={{
+              color: activeId === node.key ? "green" : "",
+              borderBottom: activeId === node.key ? "green solid 2px" : "",
+              cursor: "pointer",
+            }}
+            className="p-2 my-3 mx-1"
             onClick={() => {
               handleClick(node.key);
             }}

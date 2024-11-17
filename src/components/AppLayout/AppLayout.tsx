@@ -11,7 +11,9 @@ const AppLayout = () => {
       <AppHeader />
       <div className="flex h-full">
         <AppSideBar />
-        <Outlet />
+        <div className="p-4">
+          <Outlet />
+        </div>
       </div>
     </div>
   );

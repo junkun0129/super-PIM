@@ -5,6 +5,7 @@ import SeriesListPage from "../SeriesListPage.tsx/SeriesListPage";
 import SkuListPage from "../SkuListPage/SkuListPage";
 import { useMessageContext } from "../../providers/MessageContextProvider";
 import { useSearchParams } from "react-router-dom";
+import { queryParamKey } from "../../routes";
 
 const MainPage = () => {
   const [active, setactive] = useState("0");
@@ -30,7 +31,9 @@ const MainPage = () => {
   ];
 
   const handleTabChange = (e: string) => {
-    setSearchParams({ ["tab"]: e });
+    searchParams.set(queryParamKey.tab, e);
+
+    setSearchParams(searchParams);
   };
   return (
     <div>

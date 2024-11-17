@@ -1,13 +1,14 @@
 import React, { useContext, useEffect, useState } from "react";
 import AppTable from "../../components/AppTable/AppTable";
 import { Column } from "../../components/AppTable/type";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { getSeriesImg } from "../../util";
 import { SeriesList } from "../../api_dev/series.api";
 import seriesApi from "../../api_dev/series.api";
 import { Flag } from "../../common";
 import { useMessageContext } from "../../providers/MessageContextProvider";
 import { PRODUCT_SAIYOUS } from "../../constant";
+import { AppRoutes, paramHolder, queryParamKey } from "../../routes";
 type Row = {
   cd: string;
   hinban: string;
@@ -31,7 +32,9 @@ const SeriesListPage = () => {
   const { setMessage } = useMessageContext();
   const [total, setTotal] = useState(0);
   const { getSeriesListApi } = seriesApi;
+  const [query, setQuery] = useSearchParams();
   const navigate = useNavigate();
+  const [selectedKeys, setselectedKeys] = useState<string[]>([]);
   useEffect(() => {
     getSeries();
 
@@ -41,7 +44,15 @@ const SeriesListPage = () => {
   }, [pagination, currentPage]);
 
   const handleRowClick = (series_cd: string) => {
-    navigate("/app/seriesdetail/" + series_cd);
+    const media_cd = query.get(queryParamKey.mediaSelected);
+    if (!media_cd) return;
+    let url = AppRoutes.seriesDetailPage.replace(
+      paramHolder.series_cd,
+      series_cd
+    );
+    url += `?${queryParamKey.mediaSelected}=${media_cd}`;
+
+    navigate(url);
   };
 
   const getSeries = async () => {
@@ -86,6 +97,11 @@ const SeriesListPage = () => {
           total={total}
           onCurrentPageChange={(e) => setcurrentPage(e)}
           onPaginationChange={(e) => handlePaginaionChange(e)}
+          checkable={true}
+          seletedKeys={selectedKeys}
+          onSelect={(keys) => {
+            setselectedKeys(keys);
+          }}
         />
       )}
     </div>

@@ -9,17 +9,6 @@ import { MessageContextProvider } from "./providers/MessageContextProvider";
 import SettingPage from "./pages/SettingPage/SettingPage";
 import SeriesDetailPage from "./pages/SeriesDetail/SeriesDetailPage";
 
-const users = [
-  { id: 1, name: "John Doe", age: 28 },
-  { id: 2, name: "Jane Smith", age: 34 },
-  { id: 3, name: "Alice Johnson", age: 22 },
-];
-
-const userColumns: Column<(typeof users)[0]>[] = [
-  { header: "ID", accessor: "id" },
-  { header: "Name", accessor: "name" },
-  { header: "Age", accessor: "age" },
-];
 function App() {
   return (
     <>

@@ -15,6 +15,9 @@ export type TableProps<T extends Object> = {
   onPaginationChange: (pagination: number) => void;
   draggableAccesor?: keyof T;
   onDrop?: ({ activeCd, overCd }: { activeCd: string; overCd: string }) => void;
+  checkable?: boolean;
+  onSelect?: (keys: string[]) => void;
+  selectedKeys?: string[];
 };
 
 export type PageSetting = {

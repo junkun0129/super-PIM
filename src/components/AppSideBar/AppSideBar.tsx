@@ -5,20 +5,20 @@ import mediaApis from "../../api_dev/media.api";
 import { getObjectFromRowFormData } from "../../util";
 import { MediaTable } from "../../data/medias/medias";
 import SeriesListPage from "../../pages/SeriesListPage.tsx/SeriesListPage";
+import { master_media_cd } from "../../constant";
 
 const AppSideBar = () => {
   const navigate = useNavigate();
-  const [isshowCreateInput, setisshowCreateInput] = useState(false);
-  const [sidebarItems, setsidebarItems] = useState([]);
-  const [mediaList, setmediaList] = useState<MediaTable[]>([]);
-
-  const { createMediaApi, getAllMediaApi } = mediaApis;
 
   const baseSidebarItems = [
     {
       key: "0",
       label: "商品管理",
-      onClick: () => navigate(AppRoutes.serisListPage),
+      onClick: () => {
+        const url = `${AppRoutes.serisListPage}?${queryParamKey.mediaSelected}=${master_media_cd}&${queryParamKey.tab}=0`;
+
+        navigate(url);
+      },
     },
     {
       key: "1",
@@ -27,78 +27,18 @@ const AppSideBar = () => {
     },
   ];
 
-  const addItem = {
-    key: "2",
-    label: "＋",
-    onClick: () => setisshowCreateInput(true),
-  };
-
-  useEffect(() => {
-    // 初回マウント時にメディアリストを取得
-    updateMediaList();
-  }, []);
-
-  const updateMediaList = async () => {
-    try {
-      const res = await getAllMediaApi();
-
-      if (res.result === "success") {
-        setmediaList(res.data);
-        // mediaListが更新されたタイミングでsidebarItemsも更新
-        const newMediaItems = res.data.map((item) => ({
-          key: "media-" + item.cd,
-          label: item.name,
-          onClick: () => {
-            navigate(
-              `${AppRoutes.serisListPage}?${queryParamKey.mediaSelected}=${item.cd}&${queryParamKey.tab}=0`
-            );
-          },
-        }));
-        setsidebarItems([...baseSidebarItems, ...newMediaItems, addItem]);
-      } else {
-        console.error("Failed to fetch media list");
-      }
-    } catch (error) {
-      console.error("Error fetching media list:", error);
-    }
-  };
-
-  const MediaCreateInput = () => {
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      const values = getObjectFromRowFormData(e);
-      try {
-        const res = await createMediaApi({
-          body: { name: values["media"] as string },
-        });
-        if (res.result === "success") {
-          setisshowCreateInput(false);
-
-          updateMediaList();
-        } else {
-          console.error("Failed to create media");
-        }
-      } catch (error) {
-        console.error("Error creating media:", error);
-      }
-    };
-
-    return (
-      <form onSubmit={handleSubmit} className="flex">
-        <input autoFocus name="media" placeholder="Media Name" />
-        <button type="submit">決定</button>
-      </form>
-    );
-  };
-
+  const [sidebarItems, setsidebarItems] = useState(baseSidebarItems);
   return (
-    <div className="h-full bg-blue-50">
+    <div className="h-full w-[150px] bg-green-50 shadow-2xl flex flex-col justify-between">
       {sidebarItems.map((node) => (
-        <div key={node.key} onClick={node.onClick}>
+        <button
+          className=" rounded-md bg-white mx-2 py-2  hover:shadow-xl hover:transition-transform duration-300 "
+          key={node.key}
+          onClick={node.onClick}
+        >
           {node.label}
-        </div>
+        </button>
       ))}
-      {isshowCreateInput && <MediaCreateInput />}
     </div>
   );
 };
