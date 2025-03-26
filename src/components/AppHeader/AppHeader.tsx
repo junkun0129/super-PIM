@@ -8,7 +8,7 @@ const AppHeader = () => {
     navigate(AppRoutes.seriesCreatePage);
   };
   return (
-    <div className="w-full h-[50px] bg-green-50 shadow-lg">
+    <div className="w-full h-[50px] bg-slate-600 shadow-lg">
       <button onClick={handleClick}>series作成</button>
     </div>
   );

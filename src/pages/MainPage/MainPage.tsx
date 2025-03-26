@@ -36,7 +36,7 @@ const MainPage = () => {
     setSearchParams(searchParams);
   };
   return (
-    <div>
+    <div className="w-full">
       <AppTab data={data} activeId={active} onChange={handleTabChange} />
     </div>
   );

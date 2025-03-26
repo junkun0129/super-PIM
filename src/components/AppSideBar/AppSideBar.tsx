@@ -29,10 +29,13 @@ const AppSideBar = () => {
 
   const [sidebarItems, setsidebarItems] = useState(baseSidebarItems);
   return (
-    <div className="h-full w-[150px] bg-green-50 shadow-2xl flex flex-col justify-between">
+    <div
+      style={{ height: "calc(100vh - 50px)" }}
+      className=" w-[150px] bg-slate-600 shadow-2xl flex flex-col justify-between"
+    >
       {sidebarItems.map((node) => (
         <button
-          className=" rounded-md bg-white mx-2 py-2  hover:shadow-xl hover:transition-transform duration-300 "
+          className="rounded-sm mx-2 py-2  text-white text-opacity-100 hover:bg-slate-500  hover:text-opacity-100"
           key={node.key}
           onClick={node.onClick}
         >

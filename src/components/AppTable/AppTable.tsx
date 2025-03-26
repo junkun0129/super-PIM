@@ -1,7 +1,14 @@
-import React, { DragEventHandler, ReactNode, useEffect, useState } from "react";
+import React, {
+  DragEventHandler,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { Column, TableProps } from "./type";
 const paginatonOption = [10, 25, 50, 100];
 function AppTable<T extends Object>({
+  key,
   data,
   columns: columnsProps,
   onRowClick,
@@ -13,89 +20,81 @@ function AppTable<T extends Object>({
   onRowClickKey,
   draggableAccesor,
   onDrop,
-  checkable = false,
-  onSelect,
-  seletedKeys: selectedKeysProps,
+  checkable = true,
+  selectedKeys: selectedKeysProps,
+  onSelectedKeysChange,
 }: TableProps<T>) {
   const [activeCd, setactiveCd] = useState<null | string>(null);
   const [overCd, setoverCd] = useState<null | string>(null);
   const [columns, setcolumns] = useState<Column<T>[]>([]);
   const [dataSource, setdataSource] = useState<T[]>([]);
-  const [selectedKeys, setselectedKeys] = useState<string[]>([]);
+
   useEffect(() => {
+    const newData = data;
+    const newColumns = columnsProps;
+    const { newData: updatedData, newColumns: updatedColumn } = updateCheckBox(
+      newData,
+      newColumns,
+      checkable
+    );
+    setdataSource(updatedData);
+    setcolumns(updatedColumn);
+  }, [data, columnsProps, checkable, selectedKeysProps]);
+
+  const updateCheckBox = (
+    data: T[],
+    columns: Column<T>[],
+    checkable: boolean
+  ) => {
+    let newData = [...data];
+    let newColumns = [...columns];
     if (checkable) {
-      const newDataSource = data.map((item) => {
+      newColumns = [
+        { accessor: "check" as keyof T, header: "" },
+        ...newColumns,
+      ];
+      newData = newData.map((item) => {
         let newItem = { ...item };
-        newItem["check"] = (
-          <input
-            onChange={(e) => {
-              const isChecked = e.target.checked;
-              if (!isChecked) {
-                const newkeys = selectedKeys.filter(
-                  (key) => key !== item["cd"]
-                );
-                onSelect(newkeys);
-              } else {
-                const newkeys = [...selectedKeys];
-                newkeys.push(item["cd"]);
-                onSelect(newkeys);
-              }
-            }}
-            type="checkbox"
-          />
-        );
-        if (selectedKeysProps) {
-          const newChekced = selectedKeys.includes(item["cd"]);
-          newItem["check"] = (
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-              className="w-full h-full"
-            >
-              <input
-                onChange={(e) => {
-                  const isChecked = e.target.checked;
-                  if (!isChecked) {
-                    const newkeys = selectedKeys.filter(
-                      (key) => key !== item["cd"]
-                    );
-                    onSelect(newkeys);
-                  } else {
-                    const newkeys = [...selectedKeys];
-                    newkeys.push(item["cd"]);
-
-                    onSelect(newkeys);
-                  }
-                }}
-                checked={newChekced}
-                type="checkbox"
-              />
-            </div>
-          );
-        }
-
+        newItem["check"] = <CheckInput item={item} />;
         return newItem;
       });
-
-      setdataSource(newDataSource);
     } else {
-      setdataSource(data);
+      newColumns = newColumns.filter((column) => column.accessor !== "check");
+      newData = newData.map((item) => {
+        const newItem = { ...item };
+        delete newItem["check"];
+        return newItem;
+      });
     }
-  }, [data, selectedKeys]);
+    return { newData, newColumns };
+  };
 
-  useEffect(() => {
-    let newColumns = [...columnsProps];
-    if (checkable) {
-      newColumns = [{ accessor: "check", header: "" }, ...columnsProps];
-    }
-
-    setcolumns(newColumns);
-  }, [columnsProps]);
-
-  useEffect(() => {
-    setselectedKeys(selectedKeysProps);
-  }, [selectedKeysProps]);
+  const CheckInput = useCallback(
+    ({ item }: { item: T }) => (
+      <input
+        type="checkbox"
+        checked={selectedKeysProps.includes(item["cd"])}
+        onChange={(e) => {
+          e.stopPropagation();
+          const isChecked = (e.target as HTMLInputElement).checked;
+          if (isChecked) {
+            const newSelectedKeys = [...selectedKeysProps, item["cd"]];
+            if (onSelectedKeysChange) {
+              onSelectedKeysChange(newSelectedKeys);
+            }
+          } else {
+            const newSelectedKeys = selectedKeysProps.filter(
+              (key) => key !== item["cd"]
+            );
+            if (onSelectedKeysChange) {
+              onSelectedKeysChange(newSelectedKeys);
+            }
+          }
+        }}
+      />
+    ),
+    [selectedKeysProps]
+  );
 
   const handleRowClick = (row: T) => {
     if (onRowClickKey) {
@@ -113,6 +112,7 @@ function AppTable<T extends Object>({
       }
     }
   };
+
   const handleDragStart = (
     event: React.DragEvent<HTMLTableCellElement>,
     newActiveCd: string
@@ -161,11 +161,18 @@ function AppTable<T extends Object>({
   };
 
   return (
-    <table style={{ border: "solid 1px black" }}>
+    <table
+      key={key}
+      className="shadow-md rounded-md w-full"
+      style={{ border: "solid 1px black" }}
+    >
       <thead>
         <tr>
           {columns.map((column, index) => (
-            <th className="px-2" key={index}>
+            <th
+              className="px-3 py-2 border border-gray-400 bg-slate-500 text-white text-left font-normal"
+              key={index}
+            >
               {column.header}
             </th>
           ))}
@@ -173,15 +180,12 @@ function AppTable<T extends Object>({
       </thead>
       <tbody>
         {dataSource.map((row, rowIndex) => (
-          <tr
-            className={row["cd"]}
-            onClick={() => handleRowClick(row)}
-            key={rowIndex}
-          >
+          <tr className={`${row["cd"]}-tr hover:bg-gray-200`} key={rowIndex}>
             {columns.map((column, colIndex) => {
               const cellValue = row[column.accessor];
               return (
                 <td
+                  style={column.accessor === "check" ? { width: "0px" } : {}}
                   draggable={
                     draggableAccesor && draggableAccesor === column.accessor
                       ? true
@@ -194,13 +198,16 @@ function AppTable<T extends Object>({
                     ) {
                       e.stopPropagation();
                     }
+
+                    if (column.accessor === "check") return;
+                    handleRowClick(row);
                   }}
                   onDragStart={(e) => handleDragStart(e, row["cd"])}
                   onDrop={(e) => handleDrop(e, row["cd"])}
                   onDragEnter={(e) => handleDragEnter(e, row["cd"])}
                   onDragLeave={(e) => handleDragLeave(e, row["cd"])}
                   onDragOver={(e) => handleDragOver(e, row["cd"])}
-                  className="px-2"
+                  className="px-3 py-2  border-gray-400 border "
                   key={colIndex + rowIndex}
                 >
                   {isReactNode(cellValue) ? cellValue : String(cellValue)}
@@ -210,8 +217,8 @@ function AppTable<T extends Object>({
           </tr>
         ))}
       </tbody>
-      <tfoot>
-        <tr className="flex">
+      {/* <tfoot className="border-gray-400 border bg-white">
+        <tr className="flex ">
           <div className="flex items-center">
             <div>
               <button
@@ -261,7 +268,7 @@ function AppTable<T extends Object>({
             </select>
           </div>
         </tr>
-      </tfoot>
+      </tfoot> */}
     </table>
   );
 }

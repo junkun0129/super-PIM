@@ -1,3 +1,4 @@
+import { CreatedSeriesEntry } from "../components/AppTableHeader/components/SeriesCreateModal";
 import { SAIYOUS_TO_ID } from "../constant";
 import { attributeData } from "../data/attributes/attributes.data";
 import { attrPclData } from "../data/attrpcls/attrpcls";
@@ -169,42 +170,35 @@ const CREATE_SERIES_REQUIRED_ADD_LIST: { [key: string]: string } = {
 export const createSeriesApi = ({
   body,
 }: {
-  body: {
-    products: { [key: string]: string }[];
-    pcl_cd: string;
-  };
+  body: CreatedSeriesEntry[];
 }): Promise<{ message?: string; result: string }> =>
   new Promise((resolve, reject) => {
-    const { products, pcl_cd } = body;
-    products.map((product) => {
-      const cd = generateRandomString(17);
-
+    body.map((series) => {
       productData.push({
-        cd,
-        name: product[CREATE_SERIES_REQUIRED_ADD_LIST.SERIES_NAME],
-        hinban: product[CREATE_SERIES_REQUIRED_ADD_LIST.HINBAN],
-        is_deleted: "0",
-        is_discontinued: "0",
-        acpt_last_updated_at: "",
-        created_at: new Date().toString(),
-        updated_at: "",
-        labels: "",
-        is_series: "1",
-        pcl_cd,
+        cd: series.series_cd,
+        name: series.series_name,
         description: "",
+        is_discontinued: "0",
+        acpt_status: "0",
+        acpt_last_updated_at: "",
+        labels: "",
+        created_at: "",
+        updated_at: "",
+        hinban: "",
+        medias: "",
         series_cd: "",
-        acpt_status: SAIYOUS_TO_ID["仮登録"],
+        pcl_cd: series.pcl_cd,
+        is_series: "1",
+        is_deleted: "0",
       });
 
-      Object.entries(product).map(([key, value]) => {
-        if (Object.values(CREATE_SERIES_REQUIRED_ADD_LIST).includes(key))
-          return;
+      series.attrs.map((attr, i) => {
         const attrvalue_cd = generateRandomString(17);
         attrValueData.push({
           cd: attrvalue_cd,
-          value: value,
-          product_cd: cd,
-          attr_cd: key,
+          value: attr.value,
+          product_cd: series.series_cd,
+          attr_cd: attr.cd,
         });
       });
     });
@@ -246,10 +240,36 @@ const updateSeriesApi = ({
   });
 };
 
+const checkSeriesExists = (
+  series_cd: string,
+  series_name: string
+): Promise<{ result: string; message?: string }> => {
+  return new Promise((resolve, reject) => {
+    const cdArray = productData.filter(
+      (item) => item.is_series === "1" && item.cd === series_cd
+    );
+    const nameArray = productData.filter(
+      (item) => item.is_series === "1" && item.name === series_name
+    );
+    if (cdArray.length)
+      return resolve({
+        result: "failed",
+        message: "シリーズコードが既に存在します",
+      });
+    if (nameArray.length)
+      return resolve({
+        result: "failed",
+        message: "シリーズ名が既に存在します",
+      });
+    resolve({ result: "success" });
+  });
+};
+
 export default {
   getSeriesDetailApi,
   getSeriesListApi,
   getSeriesSkuListApi,
   createSeriesApi,
   updateSeriesApi,
+  checkSeriesExists,
 };

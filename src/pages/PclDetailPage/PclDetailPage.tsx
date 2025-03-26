@@ -245,6 +245,7 @@ const PclDetailPage = () => {
             <button type={"submit"}>更新</button>
             <div>
               <AppTable
+                key="pclDetailTable"
                 data={dataSource}
                 columns={attrColumnData}
                 onRowClick={function (id: string): void {
@@ -259,6 +260,7 @@ const PclDetailPage = () => {
                 total={total}
                 onCurrentPageChange={() => console.log("")}
                 onPaginationChange={() => console.log("")}
+                selectedKeys={[]}
               />
             </div>
           </form>

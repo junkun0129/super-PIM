@@ -9,6 +9,7 @@ import seriesApis, { SeriesDetail } from "../../api_dev/series.api";
 import productApis from "../../api_dev/product.api";
 import { queryParamKey } from "../../routes";
 import { SkuDetail } from "../../api_dev/sku.api";
+import AppAttrInput from "../AppAttrInput/AppAttrInput";
 type Props = {
   updateDetail: () => void;
   product: SkuDetail | SeriesDetail;
@@ -143,12 +144,12 @@ const AppAttrList = ({ updateDetail, product }: Props) => {
                 <>
                   {/* Label for the attribute */}
                   {attr.name + "："}
-                  {getAttrInput({
-                    cd: attr.cd,
-                    select_list: attr.select_list,
-                    value: attr.value,
-                    control_type: attr.control_type,
-                  })}
+                  <AppAttrInput
+                    cd={attr.cd}
+                    select_list={attr.select_list}
+                    value={attr.value}
+                    control_type={attr.control_type}
+                  />
                 </>
               )}
             </label>
@@ -161,116 +162,3 @@ const AppAttrList = ({ updateDetail, product }: Props) => {
 };
 
 export default AppAttrList;
-
-export const getAttrInput = ({
-  cd,
-  control_type,
-  value,
-  select_list,
-}: {
-  cd: string;
-  control_type: string;
-  value: string;
-  select_list: string;
-}) => {
-  return (
-    <>
-      {/* Single line input */}
-      {control_type === INPUT_TYPES.SINGLE_LINE && (
-        <input
-          className="input"
-          name={cd} // Unique name for the attribute
-          defaultValue={value}
-          onMouseDown={(e) => {
-            e.stopPropagation();
-          }}
-        />
-      )}
-
-      {/* Multi line input */}
-      {control_type === INPUT_TYPES.MULTI_LINE && (
-        <textarea
-          onMouseDown={(e) => {
-            e.stopPropagation();
-          }}
-          name={cd}
-          defaultValue={value}
-        />
-      )}
-
-      {/* Radio input */}
-      {control_type === INPUT_TYPES.RADIO_INPUT && (
-        <fieldset>
-          {select_list.split(";").map((item, index) => (
-            <div key={index}>
-              <input
-                type="radio"
-                name={cd} // Group radios by attribute `cd`
-                id={`${cd}-${index}`} // Unique id for each radio
-                value={item} // Value for each radio option
-                defaultChecked={item === value} // Check if it matches current value
-                onMouseDown={(e) => {
-                  e.stopPropagation();
-                }}
-              />
-              <label htmlFor={`${cd}-${index}`}>{item}</label>
-            </div>
-          ))}
-        </fieldset>
-      )}
-
-      {/* Combo box (select input) */}
-      {control_type === INPUT_TYPES.COMBO_INPUT && (
-        <select
-          onMouseDown={(e) => {
-            e.stopPropagation();
-          }}
-          name={cd}
-          defaultValue={value}
-        >
-          {select_list.split(";").map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
-      )}
-
-      {/* Number input */}
-      {control_type === INPUT_TYPES.NUMBER_INPUT && (
-        <input
-          onMouseDown={(e) => {
-            e.stopPropagation();
-          }}
-          defaultValue={value}
-          name={cd}
-          type="number"
-        />
-      )}
-
-      {/* Date input */}
-      {control_type === INPUT_TYPES.DATE_INPUT && (
-        <input
-          onMouseDown={(e) => {
-            e.stopPropagation();
-          }}
-          type="date"
-          defaultValue={value}
-          name={cd}
-        />
-      )}
-
-      {/* CheckBox input */}
-      {control_type === INPUT_TYPES.CHECKBOX_INPUT && (
-        <input
-          onMouseDown={(e) => {
-            e.stopPropagation();
-          }}
-          type="checkbox"
-          defaultChecked={value === "1"}
-          name={cd}
-        />
-      )}
-    </>
-  );
-};

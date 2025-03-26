@@ -16,6 +16,7 @@ export const productData: ProductTable[] = [
     pcl_cd: "PCL001",
     description: "めもおおおおおおおお",
     series_cd: "",
+    medias: "",
   },
   {
     cd: "PRD002",
@@ -32,6 +33,7 @@ export const productData: ProductTable[] = [
     pcl_cd: "PCL001",
     description: "めもおおおおおおおお",
     series_cd: "PRD001",
+    medias: "",
   },
   {
     cd: "PRD003",
@@ -48,5 +50,6 @@ export const productData: ProductTable[] = [
     pcl_cd: "PCL001",
     description: "めもおおおおおおおお",
     series_cd: "PRD001",
+    medias: "",
   },
 ];

@@ -5,6 +5,7 @@ export type AppDropDownListProps = {
   onSelect?: (e: string) => void;
   options: { cd: string; label: string }[];
   onClose?: () => void;
+  className?: string;
 };
 const AppDropDownList = ({
   children,
@@ -12,6 +13,7 @@ const AppDropDownList = ({
   onSelect,
   options,
   onClose,
+  className,
 }: AppDropDownListProps) => {
   const ref = useRef(null);
   const [open, setopen] = useState(openProps ?? false);
@@ -60,7 +62,7 @@ const AppDropDownList = ({
     }
   };
   return (
-    <div className="relative">
+    <div className={"relative " + className}>
       {clonedChildren}
       {open && (
         <div ref={ref} className="absolute border z-50  bg-white shadow-md">

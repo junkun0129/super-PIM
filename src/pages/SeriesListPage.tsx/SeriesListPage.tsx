@@ -9,6 +9,7 @@ import { Flag } from "../../common";
 import { useMessageContext } from "../../providers/MessageContextProvider";
 import { PRODUCT_SAIYOUS } from "../../constant";
 import { AppRoutes, paramHolder, queryParamKey } from "../../routes";
+import AppTableHeader from "../../components/AppTableHeader/AppTableHeader";
 type Row = {
   cd: string;
   hinban: string;
@@ -85,9 +86,11 @@ const SeriesListPage = () => {
 
   return (
     <div className="w-full h-full bg-red-50">
-      <div>header</div>
+      <AppTableHeader updateList={getSeries} />
+
       {data && (
         <AppTable
+          key="series"
           data={data}
           columns={columns}
           onRowClick={(series_cd) => handleRowClick(series_cd)}
@@ -98,10 +101,8 @@ const SeriesListPage = () => {
           onCurrentPageChange={(e) => setcurrentPage(e)}
           onPaginationChange={(e) => handlePaginaionChange(e)}
           checkable={true}
-          seletedKeys={selectedKeys}
-          onSelect={(keys) => {
-            setselectedKeys(keys);
-          }}
+          selectedKeys={selectedKeys}
+          onSelectedKeysChange={(keys) => setselectedKeys(keys)}
         />
       )}
     </div>

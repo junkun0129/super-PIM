@@ -9,9 +9,12 @@ const AppLayout = () => {
   return (
     <div className="w-full h-[100vh]">
       <AppHeader />
-      <div className="flex h-full">
+      <div className="flex" style={{ height: "calc(100vh - 50px)" }}>
         <AppSideBar />
-        <div className="p-4">
+        <div
+          className="p-4 w-full bg-gray-100"
+          style={{ height: "calc(100vh - 50px)" }}
+        >
           <Outlet />
         </div>
       </div>

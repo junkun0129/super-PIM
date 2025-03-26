@@ -1,32 +1,34 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import { ReactNode } from "react";
 type Props = {
   children: ReactNode;
   open: boolean;
   onClose: () => void;
+  title: string;
 };
-const AppModal = ({ children, open, onClose }: Props) => {
+const AppModal = ({ children, open, onClose, title }: Props) => {
   if (!open) {
     return null;
   }
 
   return (
     <div
-      style={{
-        position: "fixed",
-        right: "0",
-        bottom: "0",
-        left: "0",
-        top: "0",
-        backgroundColor: "black",
-      }}
-      className="flex justify-center items-center z-0"
-      onClick={(e) => {
-        e.stopPropagation();
-        onClose();
-      }}
+      onClick={(e) => onClose()}
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40"
     >
-      <div onClick={(e) => e.stopPropagation()} className=" z-10 bg-white">
-        {children}
+      {/* 中身の白い部分 */}
+      <div
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+        className="bg-white p-4 rounded-md "
+      >
+        <div className="flex justify-between mb-3">
+          <div className="text-lg font-bold">{title}</div>
+          <button onClick={() => onClose()} className="  ">
+            ✕
+          </button>
+        </div>
+        <div>{children}</div>
       </div>
     </div>
   );

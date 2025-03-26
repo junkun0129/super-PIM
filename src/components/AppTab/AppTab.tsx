@@ -15,18 +15,19 @@ const AppTab = ({ data, activeId: activeIdProp, onChange }: AppTabProps) => {
     onChange(id);
   };
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full px-6">
       {/* Label */}
       <div className="flex">
         {data.map((node, i) => (
           <div
             key={i}
             style={{
-              color: activeId === node.key ? "green" : "",
-              borderBottom: activeId === node.key ? "green solid 2px" : "",
+              color: activeId === node.key ? "rgb(100 116 139)" : "",
+              borderBottom:
+                activeId === node.key ? "rgb(100 116 139) solid 2px" : "",
               cursor: "pointer",
             }}
-            className="p-2 my-3 mx-1"
+            className="p-2 pb-1 my-3 mx-1"
             onClick={() => {
               handleClick(node.key);
             }}

@@ -99,6 +99,7 @@ const PclManagePage = () => {
               pagination={pagination}
               total={total}
               onRowClickKey={"cd"}
+              selectedKeys={[]}
               onCurrentPageChange={(e) => setcurrentPage(e)}
               onPaginationChange={(e) => setpagination(e)}
             />

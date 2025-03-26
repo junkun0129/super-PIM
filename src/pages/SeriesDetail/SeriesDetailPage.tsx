@@ -12,6 +12,7 @@ import SkuListPage from "../SkuListPage/SkuListPage";
 import AppAttrList from "../../components/AppAttrList/AppAttrList";
 import AppAssetList from "../../components/AppAssetList/AppAssetList";
 import { AppRoutes, paramHolder, queryParamKey } from "../../routes";
+import AppButton from "../../components/AppButton/AppButton";
 const SeriesDetailPage = () => {
   const { getSeriesDetailApi, getSeriesSkuListApi, updateSeriesApi } =
     seriesApis;
@@ -132,42 +133,64 @@ const SeriesDetailPage = () => {
   };
 
   return (
-    <div>
-      <button onClick={handleBackClick}>←</button>
-      <button>更新</button>
-      {series && (
-        <form onSubmit={handleSubmit}>
-          <label>
-            シリーズ名：
-            <input name="name" defaultValue={series.name} />
-          </label>
-          <label>
-            説明：
-            <textarea name="description" defaultValue={series.description} />
-          </label>
+    <div className="w-full">
+      <div className="px-6">
+        <button onClick={handleBackClick}>←</button>
+      </div>
+      <div className="flex">
+        <div className="rounded-md bg-white shadow-md flex flex-col px-6">
+          <div className="w-full flex">
+            <div className="w-[150px] h-[150px] bg-slate-500 m-4"></div>
+          </div>
+          {series && (
+            <form
+              className=" relative w-full flex flex-col py-3"
+              onSubmit={handleSubmit}
+            >
+              <div>
+                <div>シリーズ名</div>
+                <input name="name" defaultValue={series.name} />
+              </div>
 
-          <AppCategoryCascader
-            selectedKeys={selectedKeys}
-            options={categoryDataSource}
-            open={isCategoryOpen}
-            onSelect={(keys) => {
-              setselectedKeys(keys);
-              setisCategoryOpen(false);
-            }}
-            onClose={() => {
-              setisCategoryOpen(false);
-            }}
-          >
-            <div onClick={handleCategorybuttonClick}>カテゴリ</div>
-          </AppCategoryCascader>
-          <button type="submit">保存</button>
-        </form>
-      )}
-      <AppTab
-        activeId={activeTabKey}
-        onChange={handleTabKey}
-        data={tabdata.data}
-      />
+              <div>
+                <div>説明</div>
+                <textarea
+                  name="description"
+                  defaultValue={series.description}
+                />
+              </div>
+
+              <AppCategoryCascader
+                selectedKeys={selectedKeys}
+                options={categoryDataSource}
+                open={isCategoryOpen}
+                onSelect={(keys) => {
+                  setselectedKeys(keys);
+                  setisCategoryOpen(false);
+                }}
+                onClose={() => {
+                  setisCategoryOpen(false);
+                }}
+              >
+                <div onClick={handleCategorybuttonClick}>カテゴリ</div>
+              </AppCategoryCascader>
+              <div className="flex justify-end">
+                <AppButton
+                  text="保存"
+                  type="primary"
+                  isForm={true}
+                  onClick={() => {}}
+                ></AppButton>
+              </div>
+            </form>
+          )}
+        </div>
+        <AppTab
+          activeId={activeTabKey}
+          onChange={handleTabKey}
+          data={tabdata.data}
+        />
+      </div>
     </div>
   );
 };

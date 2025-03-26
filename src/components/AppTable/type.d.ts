@@ -4,6 +4,7 @@ export type Column<T extends Object> = {
 };
 
 export type TableProps<T extends Object> = {
+  key: string;
   data: T[];
   columns: Column<T>[];
   onRowClick: (id: string) => void;
@@ -16,8 +17,8 @@ export type TableProps<T extends Object> = {
   draggableAccesor?: keyof T;
   onDrop?: ({ activeCd, overCd }: { activeCd: string; overCd: string }) => void;
   checkable?: boolean;
-  onSelect?: (keys: string[]) => void;
   selectedKeys?: string[];
+  onSelectedKeysChange?: (keys: string[]) => void;
 };
 
 export type PageSetting = {

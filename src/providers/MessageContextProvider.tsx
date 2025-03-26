@@ -14,7 +14,7 @@ export const useMessageContext = () => {
 
 export const MessageContextProvider = ({ children }) => {
   const [message, setMessage] = useState<string>("");
-  
+
   useEffect(() => {
     if (message !== "") {
       setTimeout(() => {
@@ -26,7 +26,7 @@ export const MessageContextProvider = ({ children }) => {
   const useMessage = () => {};
   return (
     <MessageContext.Provider value={{ useMessage, setMessage }}>
-      <div className="fixed flex w-full justify-center bg-white shadow-sm">
+      <div className="fixed flex w-full justify-center bg-white shadow-sm z-50">
         {message}
       </div>
       {children}

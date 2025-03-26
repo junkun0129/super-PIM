@@ -96,11 +96,13 @@ const SkuListPage = () => {
   return (
     <div>
       <AppTable
+        key="sku"
         data={dataSource}
         columns={columns}
         onRowClick={handleRowClick}
         currentPage={currentPage}
         pagination={pagination}
+        selectedKeys={[]}
         total={total}
         onRowClickKey={"cd"}
         onCurrentPageChange={function (page: number): void {

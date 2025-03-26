@@ -74,6 +74,7 @@ const AttrManage = () => {
         columns={columns}
         onRowClick={() => {}}
         currentPage={1}
+        selectedKeys={[]}
         pagination={10}
         total={0}
         onCurrentPageChange={function (page: number): void {
