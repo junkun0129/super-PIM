@@ -133,48 +133,56 @@ const SeriesDetailPage = () => {
   };
 
   return (
-    <div className="w-full">
-      <div className="px-6">
-        <button onClick={handleBackClick}>←</button>
-      </div>
-      <div className="flex">
-        <div className="rounded-md bg-white shadow-md flex flex-col px-6">
+    <div className="w-full h-full">
+      <div className="mb-3 text-2xl font-bold">シリーズ詳細画面</div>
+      <div className="flex h-[95%]">
+        <div className="rounded-md bg-white shadow-md  relative  h-full flex flex-col px-6 relative">
           <div className="w-full flex">
-            <div className="w-[150px] h-[150px] bg-slate-500 m-4"></div>
+            <div className="w-full h-[150px] bg-slate-500 mt-5"></div>
           </div>
           {series && (
-            <form
-              className=" relative w-full flex flex-col py-3"
-              onSubmit={handleSubmit}
-            >
+            <form className="w-full flex flex-col py-3" onSubmit={handleSubmit}>
               <div>
-                <div>シリーズ名</div>
-                <input name="name" defaultValue={series.name} />
+                <div className="font-bold  mb-1 mt-4">シリーズ名</div>
+                <input
+                  className="border border-slate-500 p-1 px-2"
+                  name="name"
+                  defaultValue={series.name}
+                />
               </div>
 
               <div>
-                <div>説明</div>
+                <div className="font-bold  mb-1 mt-4">説明</div>
                 <textarea
+                  className="border border-slate-500 p-1 px-2 w-full"
                   name="description"
                   defaultValue={series.description}
                 />
               </div>
 
-              <AppCategoryCascader
-                selectedKeys={selectedKeys}
-                options={categoryDataSource}
-                open={isCategoryOpen}
-                onSelect={(keys) => {
-                  setselectedKeys(keys);
-                  setisCategoryOpen(false);
-                }}
-                onClose={() => {
-                  setisCategoryOpen(false);
-                }}
-              >
-                <div onClick={handleCategorybuttonClick}>カテゴリ</div>
-              </AppCategoryCascader>
-              <div className="flex justify-end">
+              <div>
+                <div className="font-bold mb-1 mt-4">カテゴリ</div>
+                <AppCategoryCascader
+                  selectedKeys={selectedKeys}
+                  options={categoryDataSource}
+                  open={isCategoryOpen}
+                  onSelect={(keys) => {
+                    setselectedKeys(keys);
+                    setisCategoryOpen(false);
+                  }}
+                  onClose={() => {
+                    setisCategoryOpen(false);
+                  }}
+                >
+                  <div
+                    onClick={handleCategorybuttonClick}
+                    className="border border-slate-500 p-1 px-2"
+                  >
+                    {"s;fdlkj"}
+                  </div>
+                </AppCategoryCascader>
+              </div>
+              <div className="absolute right-5 bottom-5 mt-10">
                 <AppButton
                   text="保存"
                   type="primary"
@@ -185,11 +193,13 @@ const SeriesDetailPage = () => {
             </form>
           )}
         </div>
-        <AppTab
-          activeId={activeTabKey}
-          onChange={handleTabKey}
-          data={tabdata.data}
-        />
+        <div className="-pt-5 ml-5 w-full rounded-md shadow-lg bg-white">
+          <AppTab
+            activeId={activeTabKey}
+            onChange={handleTabKey}
+            data={tabdata.data}
+          />
+        </div>
       </div>
     </div>
   );

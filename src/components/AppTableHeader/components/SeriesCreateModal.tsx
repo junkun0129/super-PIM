@@ -222,20 +222,36 @@ const SeriesCreateModal = ({ open, onClose, updateList }: Props) => {
             {seriesList.map((series, i) => (
               <div
                 key={i}
-                className="rounded-md bg-gray-200 p-5 py-2 shadow-md my-3"
+                className="rounded-md bg-gray-200 p-5 py-2 shadow-md my-3 w-full"
               >
                 <div className="flex justify-end">
                   <button onClick={() => handleCardClick(series.series_cd)}>
                     ✕
                   </button>
                 </div>
-                <div>シリーズ名：{series.series_name}</div>
-                <div>シリーズコード：{series.series_cd}</div>
-                <div>商品分類：{series.pcl_name}</div>
+                <div className="flex w-full">
+                  <div className="w-1/2 font-bold">シリーズ名</div>
+                  <div>{series.series_name}</div>
+                </div>
+                <div className="border-b border-gray-300 my-1"></div>
+                <div className="flex w-full">
+                  <div className="w-1/2 font-bold">シリーズコード</div>
+                  <div>{series.series_cd}</div>
+                </div>
+                <div className="border-b border-gray-300 my-1"></div>
+                <div className="flex w-full">
+                  <div className="w-1/2 font-bold">商品分類</div>
+                  <div>{series.pcl_name}</div>
+                </div>
+                <div className="border-b border-gray-300 my-1"></div>
                 {series.attrs.map((attr, i) => (
-                  <div key={i}>
-                    {attr.name}：{attr.value}
-                  </div>
+                  <>
+                    <div key={i} className="flex w-full">
+                      <div className="w-1/2 font-bold">{attr.name}</div>
+                      <div>{attr.value}</div>
+                    </div>
+                    <div className="border-b border-gray-300 my-1"></div>
+                  </>
                 ))}
               </div>
             ))}
