@@ -13,6 +13,10 @@ import AppAttrList from "../../components/AppAttrList/AppAttrList";
 import AppAssetList from "../../components/AppAssetList/AppAssetList";
 import { AppRoutes, paramHolder, queryParamKey } from "../../routes";
 import AppButton from "../../components/AppButton/AppButton";
+import AppDropDownList from "../../components/AppDropDownList/AppDropDownList";
+import pclApis from "../../api_dev/pcl.api";
+import attrApis from "../../api_dev/attrs.api";
+import productApis from "../../api_dev/product.api";
 const SeriesDetailPage = () => {
   const { getSeriesDetailApi, getSeriesSkuListApi, updateSeriesApi } =
     seriesApis;
@@ -21,7 +25,9 @@ const SeriesDetailPage = () => {
     getProductCategoriesApi,
     updateProductCategoryApi,
   } = categoryApis;
-
+  const { getPclsApi } = pclApis;
+  const { updateProductAttrsApi } = attrApis;
+  const { updateProductPclApi } = productApis;
   const [isCategoryOpen, setisCategoryOpen] = useState(false);
   const [categoryDataSource, setcategoryDataSource] = useState<CategoryNode[]>(
     []
@@ -39,10 +45,19 @@ const SeriesDetailPage = () => {
     attrs: [],
     is_series: "",
   });
+  const [category, setcategory] = useState<string>("");
   let { series_cd } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTabKey, setactiveTabKey] = useState("0");
+  const [dropDownOptions, setdropDownOptions] = useState<
+    {
+      cd: string;
+      label: string;
+    }[]
+  >([]);
+  const [dropdownOpen, setdropdownOpen] = useState(false);
+
   useEffect(() => {
     getSeries();
     getCategory();
@@ -103,9 +118,15 @@ const SeriesDetailPage = () => {
         media: "0",
       },
     });
-
     if (res.result !== "success") return;
-
+    let newCategory = "";
+    res.data.map((item, i) => {
+      if (i !== 0) {
+        newCategory += " > ";
+      }
+      newCategory += item.name;
+    });
+    setcategory(newCategory);
     setselectedKeys(res.data.map((item) => item.cd));
   };
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -132,6 +153,30 @@ const SeriesDetailPage = () => {
     setMessage("シリーズの更新に成功しました");
   };
 
+  const handleClick = async () => {
+    const res = await getPclsApi();
+    setdropDownOptions(
+      res.data.map((item) => {
+        return {
+          label: item.pcl_name,
+          cd: item.cd,
+        };
+      })
+    );
+    setdropdownOpen(true);
+  };
+
+  const handleChangePcl = async (cd) => {
+    const res = await updateProductPclApi({
+      product_cd: series.cd,
+      pcl_cd: cd,
+    });
+    if (res.result === "success") {
+      setdropdownOpen(false);
+      getSeries();
+    }
+  };
+
   return (
     <div className="w-full h-full">
       <div className="mb-3 text-2xl font-bold">シリーズ詳細画面</div>
@@ -141,7 +186,10 @@ const SeriesDetailPage = () => {
             <div className="w-full h-[150px] bg-slate-500 mt-5"></div>
           </div>
           {series && (
-            <form className="w-full flex flex-col py-3" onSubmit={handleSubmit}>
+            <form
+              className="w-full flex flex-col py-3 overflow-auto"
+              onSubmit={handleSubmit}
+            >
               <div>
                 <div className="font-bold  mb-1 mt-4">シリーズ名</div>
                 <input
@@ -159,6 +207,21 @@ const SeriesDetailPage = () => {
                   defaultValue={series.description}
                 />
               </div>
+              <div>
+                <div className="font-bold mb-1 mt-4">商品分類</div>
+                <AppDropDownList
+                  open={dropdownOpen}
+                  onSelect={handleChangePcl}
+                  options={dropDownOptions}
+                >
+                  <button
+                    className="border border-slate-500 p-1 px-2 w-full text-left"
+                    onClick={handleClick}
+                  >
+                    {series.pcl_name}
+                  </button>
+                </AppDropDownList>
+              </div>
 
               <div>
                 <div className="font-bold mb-1 mt-4">カテゴリ</div>
@@ -166,9 +229,10 @@ const SeriesDetailPage = () => {
                   selectedKeys={selectedKeys}
                   options={categoryDataSource}
                   open={isCategoryOpen}
-                  onSelect={(keys) => {
-                    setselectedKeys(keys);
+                  onSelect={(entries) => {
+                    setselectedKeys(entries.map((item) => item.key));
                     setisCategoryOpen(false);
+                    setcategory(entries.map((item) => item.value).join(" > "));
                   }}
                   onClose={() => {
                     setisCategoryOpen(false);
@@ -178,7 +242,7 @@ const SeriesDetailPage = () => {
                     onClick={handleCategorybuttonClick}
                     className="border border-slate-500 p-1 px-2"
                   >
-                    {"s;fdlkj"}
+                    {category}
                   </div>
                 </AppCategoryCascader>
               </div>

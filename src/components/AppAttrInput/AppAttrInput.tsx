@@ -62,20 +62,22 @@ const AppAttrInput = ({
 
       {/* Combo box (select input) */}
       {control_type === INPUT_TYPES.COMBO_INPUT && (
-        <select
-          className={className}
-          onMouseDown={(e) => {
-            e.stopPropagation();
-          }}
-          name={cd}
-          defaultValue={value}
-        >
-          {select_list.split(";").map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
+        <div className="custom-select">
+          <select
+            className={className + " hidden"}
+            onMouseDown={(e) => {
+              e.stopPropagation();
+            }}
+            name={cd}
+            defaultValue={value}
+          >
+            {select_list.split(";").map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        </div>
       )}
 
       {/* Number input */}

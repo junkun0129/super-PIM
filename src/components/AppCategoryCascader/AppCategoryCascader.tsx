@@ -12,7 +12,7 @@ type Props = {
   selectedKeys: string[];
   options: CategoryNode[];
   open: boolean;
-  onSelect: (keys: string[]) => void;
+  onSelect: (keys: { key: string; value: string }[]) => void;
   children: ReactNode;
   onClose: () => void;
 };
@@ -25,7 +25,9 @@ const AppCategoryCascader = ({
   onSelect,
   onClose,
 }: Props) => {
-  const [activeKeys, setActiveKeys] = useState<string[]>(["first"]);
+  const [activeEntries, setActiveEntries] = useState<
+    { key: string; value: string }[]
+  >([{ key: "first", value: "first" }]);
   const ref = useRef<HTMLDivElement>(null);
 
   // Handle outside click
@@ -44,7 +46,7 @@ const AppCategoryCascader = ({
       window.addEventListener("mousedown", handleClose);
       getDefaultValue();
     } else {
-      setActiveKeys(["first"]);
+      setActiveEntries([{ key: "first", value: "first" }]);
       window.removeEventListener("mousedown", handleClose);
     }
     // Cleanup listener on component unmount
@@ -53,19 +55,23 @@ const AppCategoryCascader = ({
 
   const getDefaultValue = useCallback(() => {
     const newKeys = selectedKeys.slice();
-    setActiveKeys(["first", ...newKeys]);
+    const newEntries = newKeys.map((key) => {
+      const node = findNodeByCd(key, options);
+      return { key, value: node?.name || "" };
+    });
+    setActiveEntries([{ key: "first", value: "first" }, ...newEntries]);
   }, [selectedKeys]);
 
   const handleClick = (
     node: CategoryNode,
     index: number,
-    newKeys: string[]
+    entries: { key: string; value: string }[]
   ) => {
-    const newActiveKeys = newKeys.slice(0, index + 1);
-    newActiveKeys.push(node.cd);
-    setActiveKeys(newActiveKeys);
+    const newActiveEntriess = entries.slice(0, index + 1);
+    newActiveEntriess.push({ key: node.cd, value: node.name });
+    setActiveEntries(newActiveEntriess);
     if (!node.children.length) {
-      onSelect(newActiveKeys.filter((item) => item !== "first"));
+      onSelect(newActiveEntriess.filter((item) => item.key !== "first"));
     }
   };
 
@@ -77,22 +83,22 @@ const AppCategoryCascader = ({
           ref={ref}
           className="absolute left-0 top-full p-2 flex shadow-md border bg-white z-10"
         >
-          {activeKeys.map((key, i) => {
+          {activeEntries.map(({ key, value }, i) => {
             const nodeOptions =
-              key === "first" ? options : findNodeByCd(key, options);
-            if (!nodeOptions?.length) return null;
+              key === "first" ? options : findNextNodeByCd(key, options);
+            if (!nodeOptions.length) return;
             return (
               <div className="" key={key + i}>
                 {nodeOptions.map((node) => (
                   <div
                     style={
-                      activeKeys.includes(node.cd)
+                      activeEntries.map((item) => item.key).includes(node.cd)
                         ? { backgroundColor: "lightblue" }
                         : {}
                     }
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleClick(node, i, activeKeys);
+                      handleClick(node, i, activeEntries);
                     }}
                     key={node.cd}
                   >
@@ -113,13 +119,31 @@ export default AppCategoryCascader;
 function findNodeByCd(
   cd: string,
   nodes: CategoryNode[]
+): CategoryNode | undefined {
+  for (const node of nodes) {
+    if (node.cd === cd) {
+      return node;
+    }
+    if (node.children) {
+      const found = findNodeByCd(cd, node.children);
+      if (found) {
+        return found;
+      }
+    }
+  }
+  return undefined;
+}
+
+function findNextNodeByCd(
+  cd: string,
+  nodes: CategoryNode[]
 ): CategoryNode[] | undefined {
   for (const node of nodes) {
     if (node.cd === cd) {
       return node.children;
     }
     if (node.children) {
-      const found = findNodeByCd(cd, node.children);
+      const found = findNextNodeByCd(cd, node.children);
       if (found) {
         return found;
       }
