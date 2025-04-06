@@ -84,12 +84,12 @@ const AppAssetList = ({ product_cd }: Props) => {
   };
 
   const updateItems = (newAsset: Asset[]) => {
-    const newItems = baseItems.map((item) => {
+    const newItems = baseItems.map((item, i) => {
       const assets = newAsset.filter((as) => as.box.type === item.key);
       return {
         ...item,
         children: (
-          <div className="flex">
+          <div key={i + "-accoritems"} className="flex flex-wrap">
             {assets.map((asset) => (
               <AppAsetBox acordionKey={item.key} asset={asset} />
             ))}
@@ -100,7 +100,7 @@ const AppAssetList = ({ product_cd }: Props) => {
     setitems(newItems);
   };
   return (
-    <div>
+    <div className=" overflow-auto">
       <AppAcordion items={items} />
     </div>
   );

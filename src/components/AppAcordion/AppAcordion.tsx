@@ -14,11 +14,31 @@ const AppAcordion = ({ items }: AppAcordionProps) => {
   };
   return (
     <div>
-      {items.map((item) => {
+      {items.map((item, i) => {
         return (
-          <div>
-            <div onClick={() => handleClick(item.key)}> {item.label}</div>
-            {activeKeys.includes(item.key) && <div>{item.children}</div>}
+          <div
+            key={i + "-accordion"}
+            className="rounded-lg bg-slate-500 my-3 shadow-lg hover:bg-slate-400"
+          >
+            <div
+              className="p-2 px-3 flex justify-between"
+              onClick={() => handleClick(item.key)}
+            >
+              <div className="text-white ">{item.label}</div>
+              <div
+                style={{
+                  transform: activeKeys.includes(item.key)
+                    ? "rotate(90deg)"
+                    : "rotate(0deg)",
+                }}
+                className="text-white text-lg"
+              >
+                {">"}
+              </div>
+            </div>
+            {activeKeys.includes(item.key) && (
+              <div className="bg-gray-200">{item.children}</div>
+            )}
           </div>
         );
       })}

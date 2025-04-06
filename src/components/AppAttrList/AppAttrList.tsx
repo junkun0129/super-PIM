@@ -5,6 +5,7 @@ import { useMessageContext } from "../../providers/MessageContextProvider";
 import { SeriesDetail } from "../../api_dev/series.api";
 import { SkuDetail } from "../../api_dev/sku.api";
 import AppAttrInput from "../AppAttrInput/AppAttrInput";
+import AppButton from "../AppButton/AppButton";
 type Props = {
   updateDetail: () => void;
   product: SkuDetail | SeriesDetail;
@@ -107,7 +108,16 @@ const AppAttrList = ({ updateDetail, product }: Props) => {
               <div className="border-b border-gray-300 my-2"></div>
             </div>
           ))}
-          <button type="submit">更新</button>
+          <div className="w-full flex justify-end">
+            <div className="w-[100px] -mr-10">
+              <AppButton
+                text={"更新"}
+                onClick={() => console.log("object")}
+                type={"primary"}
+                isForm={true}
+              ></AppButton>
+            </div>
+          </div>
         </form>
       )}
     </div>

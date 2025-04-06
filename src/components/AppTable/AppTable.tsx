@@ -6,6 +6,7 @@ import React, {
   useState,
 } from "react";
 import { Column, TableProps } from "./type";
+import AppButton from "../AppButton/AppButton";
 const paginatonOption = [10, 25, 50, 100];
 function AppTable<T extends Object>({
   key,
@@ -161,115 +162,124 @@ function AppTable<T extends Object>({
   };
 
   return (
-    <table
-      key={key}
-      className="shadow-md rounded-md w-full"
-      style={{ border: "solid 1px black" }}
-    >
-      <thead>
-        <tr>
-          {columns.map((column, index) => (
-            <th
-              className="px-3 py-2 border border-gray-400 bg-slate-500 text-white text-left font-normal"
-              key={index}
-            >
-              {column.header}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {dataSource.map((row, rowIndex) => (
-          <tr className={`${row["cd"]}-tr hover:bg-gray-200`} key={rowIndex}>
-            {columns.map((column, colIndex) => {
-              const cellValue = row[column.accessor];
-              return (
-                <td
-                  style={column.accessor === "check" ? { width: "0px" } : {}}
-                  draggable={
-                    draggableAccesor && draggableAccesor === column.accessor
-                      ? true
-                      : false
-                  }
-                  onClick={(e) => {
-                    if (
-                      draggableAccesor &&
-                      draggableAccesor === column.accessor
-                    ) {
-                      e.stopPropagation();
-                    }
-
-                    if (column.accessor === "check") return;
-                    handleRowClick(row);
-                  }}
-                  onDragStart={(e) => handleDragStart(e, row["cd"])}
-                  onDrop={(e) => handleDrop(e, row["cd"])}
-                  onDragEnter={(e) => handleDragEnter(e, row["cd"])}
-                  onDragLeave={(e) => handleDragLeave(e, row["cd"])}
-                  onDragOver={(e) => handleDragOver(e, row["cd"])}
-                  className="px-3 py-2  border-gray-400 border "
-                  key={colIndex + rowIndex}
-                >
-                  {isReactNode(cellValue) ? cellValue : String(cellValue)}
-                </td>
-              );
-            })}
+    <>
+      <table
+        key={key}
+        className="shadow-md rounded-md w-full"
+        style={{ border: "solid 1px black" }}
+      >
+        <thead>
+          <tr>
+            {columns.map((column, index) => (
+              <th
+                className="px-3 py-2 border border-gray-400 bg-slate-500 text-white text-left font-normal"
+                key={index}
+              >
+                {column.header}
+              </th>
+            ))}
           </tr>
-        ))}
-      </tbody>
-      {/* <tfoot className="border-gray-400 border bg-white">
-        <tr className="flex ">
-          <div className="flex items-center">
-            <div>
-              <button
-                onClick={() =>
-                  currentPage !== 1
-                    ? onCurrentPageChange(currentPage - 1)
-                    : console.log("nothing happen")
-                }
-              >
-                {"<"}
-              </button>
-            </div>
-            {Array(Math.ceil(total / pagination))
-              .fill(undefined)
-              .map((num, i) => (
-                <button
-                  style={i + 1 === currentPage ? { color: "blue" } : {}}
-                  key={i + "-page-button"}
-                  onClick={() => onCurrentPageChange(i + 1)}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            <div>
-              <button
-                onClick={() =>
-                  currentPage !== Math.ceil(total / pagination)
-                    ? onCurrentPageChange(currentPage + 1)
-                    : console.log("nothing happen")
-                }
-              >
-                {">"}
-              </button>
-            </div>
-          </div>
-          <div className="flex items-center">
-            <div>表示件数</div>
-            <select
-              onChange={(e) => onPaginationChange(Number(e.target.value))}
-              value={pagination}
+        </thead>
+        <tbody>
+          {dataSource.map((row, rowIndex) => (
+            <tr className={`${row["cd"]}-tr hover:bg-gray-200`} key={rowIndex}>
+              {columns.map((column, colIndex) => {
+                const cellValue = row[column.accessor];
+                return (
+                  <td
+                    style={column.accessor === "check" ? { width: "0px" } : {}}
+                    draggable={
+                      draggableAccesor && draggableAccesor === column.accessor
+                        ? true
+                        : false
+                    }
+                    onClick={(e) => {
+                      if (
+                        draggableAccesor &&
+                        draggableAccesor === column.accessor
+                      ) {
+                        e.stopPropagation();
+                      }
+
+                      if (column.accessor === "check") return;
+                      handleRowClick(row);
+                    }}
+                    onDragStart={(e) => handleDragStart(e, row["cd"])}
+                    onDrop={(e) => handleDrop(e, row["cd"])}
+                    onDragEnter={(e) => handleDragEnter(e, row["cd"])}
+                    onDragLeave={(e) => handleDragLeave(e, row["cd"])}
+                    onDragOver={(e) => handleDragOver(e, row["cd"])}
+                    className="px-3 py-2  border-gray-400 border "
+                    key={colIndex + rowIndex}
+                  >
+                    {isReactNode(cellValue) ? cellValue : String(cellValue)}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* control */}
+      <div className=" my-2 flex justify-end">
+        {/* pagination */}
+        <div className="flex items-center p-2">
+          <div className="mx-2">表示件数</div>
+          <select
+            onChange={(e) => onPaginationChange(Number(e.target.value))}
+            value={pagination}
+            className="p-1 border border-gray-400"
+          >
+            {paginatonOption.map((pag, i) => (
+              <option key={i + "pagi-option"} value={pag}>
+                {pag}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* pagination */}
+        <div className="flex items-center ml-5">
+          <div className="mr-1 px-2 text-lg  hover:bg-gray-200">
+            <button
+              className="py-1"
+              onClick={() =>
+                currentPage !== 1
+                  ? onCurrentPageChange(currentPage - 1)
+                  : console.log("nothing happen")
+              }
             >
-              {paginatonOption.map((pag, i) => (
-                <option key={i + "pagi-option"} value={pag}>
-                  {pag}
-                </option>
-              ))}
-            </select>
+              {"<"}
+            </button>
           </div>
-        </tr>
-      </tfoot> */}
-    </table>
+          {Array(Math.ceil(total / pagination))
+            .fill(undefined)
+            .map((num, i) => (
+              <div className="mx-1">
+                <AppButton
+                  key={i + "pagination"}
+                  type={i + 1 === currentPage ? "primary" : "normal"}
+                  text={i + 1}
+                  onClick={() => onCurrentPageChange(i + 1)}
+                ></AppButton>
+              </div>
+            ))}
+          <div className="ml-1 px-2 text-lg  hover:bg-gray-200">
+            <button
+              className="py-1"
+              onClick={() =>
+                currentPage !== Math.ceil(total / pagination)
+                  ? onCurrentPageChange(currentPage + 1)
+                  : console.log("nothing happen")
+              }
+            >
+              {">"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 

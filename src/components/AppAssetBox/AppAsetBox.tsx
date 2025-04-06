@@ -3,6 +3,7 @@ import { Asset } from "../../api_dev/assets.api";
 import AppDropDownList, {
   AppDropDownListProps,
 } from "../AppDropDownList/AppDropDownList";
+import AppButton from "../AppButton/AppButton";
 type AppAssetBoxProps = {
   acordionKey: string;
   asset: Asset;
@@ -16,18 +17,29 @@ const AppAsetBox = ({ acordionKey, asset }: AppAssetBoxProps) => {
     },
   ];
   return (
-    <div>
+    <div className="w-[200px] h-[260px] m-5 bg-white shadow-md relative">
       <div
-        className="w-[100px] h-[100px]"
+        className="w-full h-1/2"
         style={{
           backgroundImage: `url(${asset.asset ? asset.asset.img : ""})`,
           backgroundSize: "contain",
         }}
       ></div>
-      <div className="relative">
-        <div>ID:{asset.box.no}</div>
-        <div>ラベル:{asset.box.lbl}</div>
-        <div>拡張子:{asset.box.ext}</div>
+      <div className="relative w-full flex px-2">
+        <div className="flex flex-col w-full">
+          <div className="w-full flex mt-3">
+            <div className="w-1/3 font-bold">ID</div>
+            <div className="w-2/3">：{asset.box.no}</div>
+          </div>
+          <div className="w-full flex mt-1">
+            <div className="w-1/3 font-bold">ラベル</div>
+            <div className="w-2/3">：{asset.box.lbl}</div>
+          </div>
+          <div className="w-full flex mt-1">
+            <div className="w-1/3 font-bold">拡張子</div>
+            <div className="w-2/3">：{asset.box.ext}</div>
+          </div>
+        </div>
         <AppDropDownList
           open={isOpen}
           onSelect={function (e: string): void {
@@ -36,12 +48,13 @@ const AppAsetBox = ({ acordionKey, asset }: AppAssetBoxProps) => {
           options={options}
           onClose={() => setisOpen(false)}
         >
-          <button
-            onClick={() => setisOpen(true)}
-            className="absolute right-0 bottom-0"
-          >
-            ⚙
-          </button>
+          <div className="absolute right-0 -bottom-8">
+            <AppButton
+              text="⚙"
+              type="normal"
+              onClick={() => setisOpen(true)}
+            ></AppButton>
+          </div>
         </AppDropDownList>
       </div>
     </div>
