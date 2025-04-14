@@ -13,6 +13,20 @@ export const mainType = {
 export const prdcdPattern = /^[A-Za-z0-9-_. ]*$/;
 export const halfNumPattern = /^[0-9]*$/;
 
+export const COOKIES = {
+  token: "tk",
+  email: "em",
+  cd: "cd",
+  name: "un",
+  isLoggedin: "il",
+};
+
+export const URL = {
+  LOGIN: "/auth/signin",
+  SIGNUP: "/auth/signup",
+  MAIN: "/main",
+};
+
 export const layout = {
   header: 40,
   setting: {

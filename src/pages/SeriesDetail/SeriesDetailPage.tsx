@@ -11,7 +11,7 @@ import { useMessageContext } from "../../providers/MessageContextProvider";
 import SkuListPage from "../SkuListPage/SkuListPage";
 import AppAttrList from "../../components/AppAttrList/AppAttrList";
 import AppAssetList from "../../components/AppAssetList/AppAssetList";
-import { AppRoutes, paramHolder, queryParamKey } from "../../routes";
+import { AppRoutes, queryParamKey } from "../../routes";
 import AppButton from "../../components/AppButton/AppButton";
 import AppDropDownList from "../../components/AppDropDownList/AppDropDownList";
 import pclApis from "../../api_dev/pcl.api";

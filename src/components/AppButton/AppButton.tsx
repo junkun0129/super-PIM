@@ -4,10 +4,21 @@ type AppButtonProps = {
   onClick: () => void;
   type: "normal" | "primary";
   isForm?: boolean;
+  className?: string;
 };
-const AppButton = ({ text, onClick, type, isForm = false }: AppButtonProps) => {
+const AppButton = ({
+  text,
+  onClick,
+  type,
+  isForm = false,
+  className: classNameProps,
+}: AppButtonProps) => {
   let className =
-    "px-2 py-1 text-sm rounded-sm border border-slate-500 hover:-translate-y-[2px] active:translate-y-0 hover:shadow-md";
+    "px-2 py-1 text-sm rounded-sm border h-[40px] border-slate-500 hover:-translate-y-[2px] active:translate-y-0 hover:shadow-md ";
+
+  if (classNameProps) {
+    className += classNameProps;
+  }
 
   if (type === "normal") {
     className +=

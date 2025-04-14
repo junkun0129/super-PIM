@@ -3,6 +3,7 @@ import React, {
   ReactNode,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { Column, TableProps } from "./type";
@@ -29,7 +30,13 @@ function AppTable<T extends Object>({
   const [overCd, setoverCd] = useState<null | string>(null);
   const [columns, setcolumns] = useState<Column<T>[]>([]);
   const [dataSource, setdataSource] = useState<T[]>([]);
-
+  const [allChecked, setallChecked] = useState<{
+    checked: boolean;
+    apply: boolean;
+  }>({
+    checked: false,
+    apply: false,
+  });
   useEffect(() => {
     const newData = data;
     const newColumns = columnsProps;
@@ -42,6 +49,29 @@ function AppTable<T extends Object>({
     setcolumns(updatedColumn);
   }, [data, columnsProps, checkable, selectedKeysProps]);
 
+  useEffect(() => {
+    if (!onSelectedKeysChange) return;
+    if (!allChecked.apply) return;
+    console.log(allChecked);
+    if (allChecked.checked) {
+      let newSelectedKeys = [];
+      dataSource.map((item) => {
+        newSelectedKeys.push(item["cd"]);
+      });
+      onSelectedKeysChange([
+        ...new Set([...selectedKeysProps, ...newSelectedKeys]),
+      ]);
+    } else {
+      let onPageKeys = dataSource.map((item) => item["cd"]);
+      let newSelectedKeys = selectedKeysProps.filter((item) => {
+        const is = onPageKeys.includes(item);
+
+        return !is;
+      });
+      onSelectedKeysChange(newSelectedKeys);
+    }
+  }, [allChecked]);
+
   const updateCheckBox = (
     data: T[],
     columns: Column<T>[],
@@ -51,7 +81,21 @@ function AppTable<T extends Object>({
     let newColumns = [...columns];
     if (checkable) {
       newColumns = [
-        { accessor: "check" as keyof T, header: "" },
+        {
+          accessor: "check" as keyof T,
+          header: (
+            <input
+              type="checkbox"
+              checked={allChecked.checked}
+              onChange={(e) => {
+                setallChecked({
+                  checked: e.target.checked,
+                  apply: true,
+                });
+              }}
+            />
+          ),
+        },
         ...newColumns,
       ];
       newData = newData.map((item) => {
@@ -244,11 +288,12 @@ function AppTable<T extends Object>({
           <div className="mr-1 px-2 text-lg  hover:bg-gray-200">
             <button
               className="py-1"
-              onClick={() =>
+              onClick={() => {
                 currentPage !== 1
                   ? onCurrentPageChange(currentPage - 1)
-                  : console.log("nothing happen")
-              }
+                  : console.log("nothing happen");
+                setallChecked({ checked: false, apply: false });
+              }}
             >
               {"<"}
             </button>
@@ -261,18 +306,22 @@ function AppTable<T extends Object>({
                   key={i + "pagination"}
                   type={i + 1 === currentPage ? "primary" : "normal"}
                   text={i + 1}
-                  onClick={() => onCurrentPageChange(i + 1)}
+                  onClick={() => {
+                    onCurrentPageChange(i + 1);
+                    setallChecked({ checked: false, apply: false });
+                  }}
                 ></AppButton>
               </div>
             ))}
           <div className="ml-1 px-2 text-lg  hover:bg-gray-200">
             <button
               className="py-1"
-              onClick={() =>
+              onClick={() => {
                 currentPage !== Math.ceil(total / pagination)
                   ? onCurrentPageChange(currentPage + 1)
-                  : console.log("nothing happen")
-              }
+                  : console.log("nothing happen");
+                setallChecked({ checked: false, apply: false });
+              }}
             >
               {">"}
             </button>

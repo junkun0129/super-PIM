@@ -8,6 +8,8 @@ import MainPage from "./pages/MainPage/MainPage";
 import { MessageContextProvider } from "./providers/MessageContextProvider";
 import SettingPage from "./pages/SettingPage/SettingPage";
 import SeriesDetailPage from "./pages/SeriesDetail/SeriesDetailPage";
+import SigninPage from "./pages/SigninPage/SigninPage";
+import SignupPage from "./pages/SignupPage/SignupPage";
 
 function App() {
   return (
@@ -15,6 +17,10 @@ function App() {
       <MessageContextProvider>
         <BrowserRouter>
           <Routes>
+            <Route path="/auth">
+              <Route path="/auth/signin" element={<SigninPage />} />
+              <Route path="/auth/signup" element={<SignupPage />} />
+            </Route>
             <Route path="/" element={<AppLayout />}>
               <Route path={AppRoutes.serisListPage} element={<MainPage />} />
               <Route
