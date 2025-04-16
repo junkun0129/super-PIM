@@ -14,11 +14,11 @@ export const prdcdPattern = /^[A-Za-z0-9-_. ]*$/;
 export const halfNumPattern = /^[0-9]*$/;
 
 export const COOKIES = {
-  token: "tk",
-  email: "em",
-  cd: "cd",
-  name: "un",
-  isLoggedin: "il",
+  TOKEN: "tk",
+  EMAIL: "em",
+  CD: "cd",
+  NAME: "un",
+  ISLOGGEDIN: "il",
 };
 
 export const URL = {
@@ -306,7 +306,7 @@ export const INPUT_TYPE_TO_STRING = new Map([
   [INPUT_TYPES.DATE_INPUT, "日付"],
 ]);
 
-const INPUT_STRING_TO_TYPE = new Map([
+export const INPUT_STRING_TO_TYPE = new Map([
   ["単数行テキスト", INPUT_TYPES.SINGLE_LINE],
   ["複数行テキスト", INPUT_TYPES.MULTI_LINE],
   ["コンボ選択", INPUT_TYPES.COMBO_INPUT],

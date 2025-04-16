@@ -1,11 +1,4 @@
-import React, {
-  DragEventHandler,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { ReactNode, useCallback, useEffect, useState } from "react";
 import { Column, TableProps } from "./type";
 import AppButton from "../AppButton/AppButton";
 const paginatonOption = [10, 25, 50, 100];
@@ -52,7 +45,6 @@ function AppTable<T extends Object>({
   useEffect(() => {
     if (!onSelectedKeysChange) return;
     if (!allChecked.apply) return;
-    console.log(allChecked);
     if (allChecked.checked) {
       let newSelectedKeys = [];
       dataSource.map((item) => {
@@ -85,6 +77,7 @@ function AppTable<T extends Object>({
           accessor: "check" as keyof T,
           header: (
             <input
+              className="w-4 h-4 flex justify-center items-center"
               type="checkbox"
               checked={allChecked.checked}
               onChange={(e) => {
@@ -117,6 +110,7 @@ function AppTable<T extends Object>({
   const CheckInput = useCallback(
     ({ item }: { item: T }) => (
       <input
+        className="w-4 h-4 flex justify-center items-center"
         type="checkbox"
         checked={selectedKeysProps.includes(item["cd"])}
         onChange={(e) => {

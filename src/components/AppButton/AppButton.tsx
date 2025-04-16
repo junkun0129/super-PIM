@@ -5,6 +5,7 @@ type AppButtonProps = {
   type: "normal" | "primary";
   isForm?: boolean;
   className?: string;
+  disabled?: boolean;
 };
 const AppButton = ({
   text,
@@ -12,6 +13,7 @@ const AppButton = ({
   type,
   isForm = false,
   className: classNameProps,
+  disabled = false,
 }: AppButtonProps) => {
   let className =
     "px-2 py-1 text-sm rounded-sm border h-[40px] border-slate-500 hover:-translate-y-[2px] active:translate-y-0 hover:shadow-md ";
@@ -28,7 +30,8 @@ const AppButton = ({
   }
   return (
     <button
-      className={className}
+      disabled={disabled}
+      className={!disabled ? className : className + " bg-slate-300"}
       onClick={onClick}
       type={isForm ? "submit" : "button"}
     >

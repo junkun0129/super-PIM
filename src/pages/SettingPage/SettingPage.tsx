@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import AppTab from "../../components/AppTab/AppTab";
-import PclManagePage from "./PclManagePage";
+
 import CategoryManage from "./CategoryManage";
-import AttrManage from "./AttrManage";
+import AttrManage from "./AttrManage/AttrManage";
 import LabelManage from "./LabelManage";
 import { useSearchParams } from "react-router-dom";
 import { queryParamKey } from "../../routes";
+import PclManagePage from "./PclMange/PclManagePage";
 
 const SettingPage = () => {
   const [activeTab, setactiveTab] = useState("0");

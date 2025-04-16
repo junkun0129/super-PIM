@@ -12,6 +12,34 @@ export function generateRandomString(length: number = 35) {
   return result;
 }
 
+export const isoToDateText = (iso: string) => {
+  if (iso === "" || !iso) return "";
+  const date = new Date(iso);
+
+  const formatted = `${date.getFullYear()}年${
+    date.getMonth() + 1
+  }月${date.getDate()}日`;
+  return formatted;
+};
+
+export const flagToText = ({
+  flag,
+  okText,
+  notText,
+}: {
+  flag: string;
+  okText: string;
+  notText: string;
+}) => {
+  if (flag === "0") {
+    return notText;
+  }
+  if (flag === "1") {
+    return okText;
+  }
+  return "";
+};
+
 export function getSeriesImg(fileName: string) {
   return "/img/series/" + fileName;
 }
@@ -154,4 +182,39 @@ export function labelDeleteString(str, target) {
 export function removeSpecificString(input, stringToRemove) {
   const regex = new RegExp(stringToRemove, "g");
   return input.replace(regex, "");
+}
+
+export async function runWithConcurrency<T>(
+  tasks: (() => Promise<T>)[],
+  concurrency: number
+): Promise<T[]> {
+  const results: T[] = [];
+  const executing: Promise<void>[] = [];
+
+  let i = 0;
+  const enqueue = async () => {
+    if (i >= tasks.length) return;
+
+    const taskIndex = i++;
+    const task = tasks[taskIndex];
+
+    const p = task().then((result) => {
+      results[taskIndex] = result;
+    });
+
+    const e = p.finally(() => {
+      executing.splice(executing.indexOf(e), 1);
+    });
+
+    executing.push(e);
+
+    if (executing.length >= concurrency) {
+      await Promise.race(executing); // Wait for the first one to finish
+    }
+
+    return enqueue(); // Continue with next task
+  };
+
+  await Promise.all(new Array(concurrency).fill(0).map(() => enqueue()));
+  return results;
 }

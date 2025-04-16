@@ -1,3 +1,4 @@
+import { COOKIES, URL } from "../constant";
 import { getCookie, resetAllCookies } from "../util";
 
 export type ApiRes<DATA> = {
@@ -11,13 +12,12 @@ export const fetchRequest = async (
   isauth: boolean = false
 ) => {
   try {
-    const token = getCookie("pidica-token");
+    const token = getCookie(COOKIES.TOKEN);
 
     const headers = new Headers();
     if (!isauth) {
       if (!token) {
-        resetAllCookies();
-        // window.location.href = "/signin";
+        handleAuthError();
       }
       headers.append("Authorization", `Bearer ${token}`);
     }
@@ -37,12 +37,11 @@ export const fetchRequest = async (
 
     return response.json();
   } catch (error) {
-    console.error(error);
     return { result: "failed" };
   }
 };
 
 const handleAuthError = () => {
   resetAllCookies();
-  window.location.href = "/signin";
+  window.location.href = URL.LOGIN;
 };

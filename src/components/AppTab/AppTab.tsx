@@ -8,7 +8,6 @@ const AppTab = ({ data, activeId: activeIdProp, onChange }: AppTabProps) => {
     setactiveId(activeIdProp);
   }, [activeIdProp]);
   const handleClick = (id: string) => {
-    console.log(id);
     if (!activeIdProp) {
       setactiveId(id);
     }
