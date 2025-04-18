@@ -8,6 +8,8 @@ import { queryParamKey } from "../../../routes";
 import { GetPclListApi } from "../../../api/pcl.api";
 import { isoToDateText } from "../../../util";
 import PclCreateButton from "./PclCreateButton";
+import PclDeleteButton from "./PclDeleteButton";
+import PclUpdateModal from "./PclUpdateModal";
 type Row = {
   cd: string;
   name: string;
@@ -31,6 +33,7 @@ const PclManagePage = () => {
   const { addAttrToPclApi, createPclApi, getPclsApi } = pclApis;
   const navigate = useNavigate();
   const [searchParams, setSearchPrams] = useSearchParams();
+  const [selectedPclKey, setselectedPclKey] = useState<string | null>(null);
 
   useEffect(() => {
     updatePclList(page, pageSize, listorder, keyword);
@@ -43,7 +46,7 @@ const PclManagePage = () => {
     kw: string
   ) => {
     const res = await GetPclListApi({ pg, ps, or, kw });
-    console.log(res);
+
     const { data, total } = res;
     setTotal(total);
     const newDataSource = data.map((item) => {
@@ -56,22 +59,30 @@ const PclManagePage = () => {
     });
     setdataSource(newDataSource);
   };
-  const handleRowClick = (cd: string) => {};
   return (
     <div>
       {searchParams.get(queryParamKey.pclDetail) ? (
         <PclDetailPage />
       ) : (
         <div>
-          <PclCreateButton
-            onUpdate={() => {
-              updatePclList(page, pageSize, listorder, keyword);
-            }}
-          />
+          <div className="flex">
+            <PclCreateButton
+              onUpdate={() => {
+                updatePclList(page, pageSize, listorder, keyword);
+              }}
+            />
+            <PclDeleteButton
+              selectedKeys={selectedKeys}
+              updateList={() => {
+                setselectedKeys([]);
+                updatePclList(page, pageSize, listorder, keyword);
+              }}
+            />
+          </div>
           <AppTable
             data={dataSource}
             columns={pclColumnData}
-            onRowClick={(id) => handleRowClick(id)}
+            onRowClick={(cd) => setselectedPclKey(cd)}
             currentPage={page}
             pagination={pageSize}
             total={total}
@@ -84,6 +95,13 @@ const PclManagePage = () => {
           />
         </div>
       )}
+      <PclUpdateModal
+        selectedPclKey={selectedPclKey}
+        onClose={() => setselectedPclKey(null)}
+        onUpdate={() => {
+          updatePclList(page, pageSize, listorder, keyword);
+        }}
+      />
     </div>
   );
 };

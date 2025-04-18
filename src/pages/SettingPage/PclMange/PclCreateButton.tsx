@@ -81,10 +81,11 @@ const PclCreateButton = ({ onUpdate }: Props) => {
     const values = selectedKeys.map((cd) => ({
       pcl_cd: res.data.pcl_cd,
       atr_cd: cd,
-      atp_is_show: formData.get(`${cd}-atr_is_show`)?.toString() ?? "",
-      atp_alter_name: formData.get(`${cd}-atr_alter_name`)?.toString() ?? "",
-      atp_is_common: formData.get(`${cd}-atr_is_common`)?.toString() ?? "",
+      atp_is_show: formData.get(`${cd}-atp_is_show`) ? "1" : "0",
+      atp_alter_name: formData.get(`${cd}-atp_alter_name`)?.toString() ?? "",
+      atp_is_common: formData.get(`${cd}-atp_is_common`) ? "1" : "0",
     }));
+
     const res2 = await AddAttrsToPclApi({ body: values });
     if (res2.result !== "success") return;
     setisModalOpen(false);
@@ -94,6 +95,7 @@ const PclCreateButton = ({ onUpdate }: Props) => {
   return (
     <>
       <AppButton
+        className="px-5 mb-1 mr-1"
         text={"＋ 属性セットを作成する"}
         onClick={() => setisModalOpen(true)}
         type={"primary"}

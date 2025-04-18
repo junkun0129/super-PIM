@@ -21,6 +21,15 @@ export const isoToDateText = (iso: string) => {
   }月${date.getDate()}日`;
   return formatted;
 };
+export const flagToBoolean = ({ flag }: { flag: string }) => {
+  if (flag === "0") {
+    return false;
+  }
+  if (flag === "1") {
+    return true;
+  }
+  return false;
+};
 
 export const flagToText = ({
   flag,

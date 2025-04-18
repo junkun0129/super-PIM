@@ -32,6 +32,37 @@ export const GetPclListApi = async ({
   const res = await fetchRequest(url, "GET");
   return res;
 };
+export type PclDetail = {
+  pcl_cd: string;
+  pcl_name: string;
+  pcl_created_at: Date;
+  attrpcl: {
+    atp_cd: string;
+    atp_order: number;
+    atp_is_show: string;
+    atp_alter_name: string | null;
+    atp_is_common: string;
+    attr: {
+      atr_name: string;
+    };
+  }[];
+};
+type GetPclDetailApiReq = {
+  pcl_cd: string;
+};
+
+type GetPclDetailApiRes = {
+  message: string;
+  result: string;
+  data?: PclDetail;
+};
+export const GetPclDetailApi = async ({
+  pcl_cd,
+}: GetPclDetailApiReq): Promise<GetPclDetailApiRes> => {
+  const url = `/atp/pcl/detail/${pcl_cd}`;
+  const res = await fetchRequest(url, "GET");
+  return res;
+};
 
 type GetPclAttrListApiReq = {
   pg: string;
@@ -105,8 +136,15 @@ export const AddAttrsToPclApi = async ({
 
 type UpdatePclApiReq = {
   body: {
-    pcl_name: string;
     pcl_cd: string;
+    pcl_name: string;
+    attrs: {
+      atp_cd: string;
+      atp_alter_name: string;
+      atp_is_common: string;
+      atp_is_show: string;
+      atp_order: string;
+    }[];
   };
 };
 
