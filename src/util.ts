@@ -227,3 +227,31 @@ export async function runWithConcurrency<T>(
   await Promise.all(new Array(concurrency).fill(0).map(() => enqueue()));
   return results;
 }
+export const normalizeBoolean = (value: any): boolean | null => {
+  if (value === 1 || value === "1") return true;
+  if (value === 0 || value === "0") return false;
+  if (value === true || value === false) return value;
+  return null;
+};
+export function moveBehindByKey<T extends Record<string, any>>(
+  arr: T[],
+  activeKey: string,
+  overKey: string,
+  targetKey: keyof T
+): T[] | undefined {
+  if (!arr.every((obj) => targetKey in obj)) return;
+
+  const fromIndex = arr.findIndex((item) => item[targetKey] === activeKey);
+  const toIndex = arr.findIndex((item) => item[targetKey] === overKey);
+
+  if (fromIndex === -1 || toIndex === -1) return arr;
+
+  const newArr = [...arr];
+  const [movedItem] = newArr.splice(fromIndex, 1);
+
+  // 挿入位置：spliceで要素が1つ減った場合の補正あり
+  const insertAt = fromIndex < toIndex ? toIndex : toIndex + 1;
+
+  newArr.splice(insertAt, 0, movedItem);
+  return newArr;
+}

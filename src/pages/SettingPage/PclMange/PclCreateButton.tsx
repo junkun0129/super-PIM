@@ -8,6 +8,7 @@ import { Column } from "../../../components/AppTable/type";
 import { AddAttrsToPclApi, CreatePclApi } from "../../../api/pcl.api";
 type Row = {
   cd: string;
+
   name: string;
   alter_name: ReactNode;
   is_common: ReactNode;
@@ -45,6 +46,7 @@ const PclCreateButton = ({ onUpdate }: Props) => {
     const newDataSource: Row[] = res.data.map((item) => ({
       cd: item.atr_cd,
       name: item.atr_name,
+
       alter_name: (
         <input
           name={`${item.atr_cd}-atp_alter_name`}
@@ -78,12 +80,13 @@ const PclCreateButton = ({ onUpdate }: Props) => {
     const res = await CreatePclApi({ body: { pcl_name } });
     if (res.result !== "success") return;
 
-    const values = selectedKeys.map((cd) => ({
+    const values = selectedKeys.map((cd, i) => ({
       pcl_cd: res.data.pcl_cd,
       atr_cd: cd,
       atp_is_show: formData.get(`${cd}-atp_is_show`) ? "1" : "0",
       atp_alter_name: formData.get(`${cd}-atp_alter_name`)?.toString() ?? "",
       atp_is_common: formData.get(`${cd}-atp_is_common`) ? "1" : "0",
+      atp_order: i,
     }));
 
     const res2 = await AddAttrsToPclApi({ body: values });

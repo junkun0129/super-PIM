@@ -5,7 +5,7 @@ import AppTable from "../../../components/AppTable/AppTable";
 import AppButton from "../../../components/AppButton/AppButton";
 import { Column } from "../../../components/AppTable/type";
 import { GetPclDetailApi, PclDetail, updatePclApi } from "../../../api/pcl.api";
-import { flagToBoolean } from "../../../util";
+import { flagToBoolean, moveBehindByKey } from "../../../util";
 type Props = {
   selectedPclKey: string | null;
   onClose: () => void;
@@ -13,6 +13,7 @@ type Props = {
 };
 type Row = {
   cd: string;
+  action: ReactNode;
   name: string;
   order: ReactNode;
   alter_name: ReactNode;
@@ -21,6 +22,7 @@ type Row = {
 };
 
 const columns: Column<Row>[] = [
+  { accessor: "action", header: "順番変更" },
   { accessor: "name", header: "項目名" },
   { accessor: "alter_name", header: "表示名" },
   { accessor: "is_common", header: "必須項目" },
@@ -50,6 +52,7 @@ const PclUpdateModal = ({ selectedPclKey, onClose, onUpdate }: Props) => {
     const newDataSource: Row[] = res.data.attrpcl.map((item) => ({
       cd: item.atp_cd,
       name: item.attr.atr_name,
+      action: <div className="cursor-pointer">：</div>,
       order: (
         <input
           defaultValue={item.atp_order}
@@ -111,6 +114,7 @@ const PclUpdateModal = ({ selectedPclKey, onClose, onUpdate }: Props) => {
     },
     [selectedPclKey]
   );
+
   return (
     <AppModal
       open={!!selectedPclKey}
@@ -139,6 +143,18 @@ const PclUpdateModal = ({ selectedPclKey, onClose, onUpdate }: Props) => {
           onRowClick={function (id: string): void {
             throw new Error("Function not implemented.");
           }}
+          onDrop={({ activeCd, overCd }) => {
+            const newDatasource = [...dataSource];
+            const sortedDataSource = moveBehindByKey(
+              newDatasource,
+              activeCd,
+              overCd,
+              "cd"
+            );
+            setdataSource(sortedDataSource);
+          }}
+          checkable={false}
+          draggableAccesor="action"
           currentPage={page}
           pagination={pageSize}
           total={10}
