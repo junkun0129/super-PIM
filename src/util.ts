@@ -250,7 +250,7 @@ export function moveBehindByKey<T extends Record<string, any>>(
   const [movedItem] = newArr.splice(fromIndex, 1);
 
   // 挿入位置：spliceで要素が1つ減った場合の補正あり
-  const insertAt = fromIndex < toIndex ? toIndex : toIndex + 1;
+  const insertAt = fromIndex < toIndex ? toIndex : toIndex;
 
   newArr.splice(insertAt, 0, movedItem);
   return newArr;

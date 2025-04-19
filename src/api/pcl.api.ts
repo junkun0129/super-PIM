@@ -118,6 +118,7 @@ type AddAttrsToPclApiReq = {
     atp_is_show: string;
     atp_alter_name: string;
     atp_is_common: string;
+    atp_order: number;
   }[];
 };
 
