@@ -144,7 +144,7 @@ type UpdatePclApiReq = {
       atp_alter_name: string;
       atp_is_common: string;
       atp_is_show: string;
-      atp_order: string;
+      atp_order: number;
     }[];
   };
 };

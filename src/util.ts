@@ -255,3 +255,25 @@ export function moveBehindByKey<T extends Record<string, any>>(
   newArr.splice(insertAt, 0, movedItem);
   return newArr;
 }
+
+export function changeOrderByOrder<T extends Record<string, any>>(
+  arr: T[],
+
+  orderKey: keyof T
+) {
+  if (arr.map((item) => item[orderKey]).some((item) => isNaN(item))) return arr;
+  const newArr = [...arr];
+  let minimum = newArr[0][orderKey];
+  newArr.forEach((item) => {
+    if (item[orderKey] < minimum) {
+      minimum = item[orderKey];
+    }
+  });
+  return newArr.map((item, i) => {
+    if (i === 0) return item;
+    return {
+      ...item,
+      [orderKey]: minimum + i,
+    };
+  });
+}
