@@ -1,26 +1,37 @@
 import { INPUT_TYPES } from "../../constant";
+import AppSelect from "../AppSelect/AppSelect";
 
 const AppAttrInput = ({
   cd,
   control_type,
-  value,
   select_list,
   className,
+  maxLength,
+  is_with_unit,
+  unit,
+  default_value,
+  required = false,
 }: {
   cd: string;
   control_type: string;
-  value: string;
   select_list: string;
+  is_with_unit: string;
+  unit: string;
+  default_value: string;
+  required?: boolean;
+  maxLength?: number;
   className?: string;
 }) => {
   return (
-    <>
+    <div className="flex">
       {/* Single line input */}
       {control_type === INPUT_TYPES.SINGLE_LINE && (
         <input
-          className={"input border border-slate-500 " + className}
+          className={"input border border-slate-500 w-full" + className}
           name={cd} // Unique name for the attribute
-          defaultValue={value}
+          defaultValue={default_value}
+          {...(!!maxLength ? { maxLength } : {})}
+          required={required}
           onMouseDown={(e) => {
             e.stopPropagation();
           }}
@@ -30,12 +41,14 @@ const AppAttrInput = ({
       {/* Multi line input */}
       {control_type === INPUT_TYPES.MULTI_LINE && (
         <textarea
-          className={className}
+          className={className + " w-full border border-slate-500"}
+          required={required}
+          {...(!!maxLength ? { maxLength } : {})}
           onMouseDown={(e) => {
             e.stopPropagation();
           }}
           name={cd}
-          defaultValue={value}
+          defaultValue={default_value}
         />
       )}
 
@@ -49,7 +62,7 @@ const AppAttrInput = ({
                 name={cd} // Group radios by attribute `cd`
                 id={`${cd}-${index}`} // Unique id for each radio
                 value={item} // Value for each radio option
-                defaultChecked={item === value} // Check if it matches current value
+                defaultChecked={item === default_value} // Check if it matches current value
                 onMouseDown={(e) => {
                   e.stopPropagation();
                 }}
@@ -62,21 +75,15 @@ const AppAttrInput = ({
 
       {/* Combo box (select input) */}
       {control_type === INPUT_TYPES.COMBO_INPUT && (
-        <div className="custom-select">
-          <select
-            className={className + " hidden"}
-            onMouseDown={(e) => {
-              e.stopPropagation();
-            }}
+        <div className="w-full">
+          <AppSelect
+            options={select_list
+              .split(";")
+              .map((item) => ({ cd: item, label: item }))}
+            required={required}
+            label={""}
             name={cd}
-            defaultValue={value}
-          >
-            {select_list.split(";").map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
+          />
         </div>
       )}
 
@@ -87,7 +94,9 @@ const AppAttrInput = ({
           onMouseDown={(e) => {
             e.stopPropagation();
           }}
-          defaultValue={value}
+          {...(!!maxLength ? { maxLength } : {})}
+          required={required}
+          defaultValue={default_value}
           name={cd}
           type="number"
         />
@@ -100,8 +109,9 @@ const AppAttrInput = ({
           onMouseDown={(e) => {
             e.stopPropagation();
           }}
+          required={required}
           type="date"
-          defaultValue={value}
+          defaultValue={default_value}
           name={cd}
         />
       )}
@@ -114,11 +124,14 @@ const AppAttrInput = ({
             e.stopPropagation();
           }}
           type="checkbox"
-          defaultChecked={value === "1"}
+          defaultChecked={default_value === "1"}
           name={cd}
         />
       )}
-    </>
+      {is_with_unit === "1" && (
+        <div className="flex items-center ml-2">{unit}</div>
+      )}
+    </div>
   );
 };
 export default AppAttrInput;

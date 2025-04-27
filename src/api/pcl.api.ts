@@ -1,4 +1,3 @@
-import { DefaultDeserializer } from "v8";
 import { Result } from "../types/api.type";
 import { fetchRequest } from "./helper.api";
 
@@ -32,6 +31,48 @@ export const GetPclListApi = async ({
   const res = await fetchRequest(url, "GET");
   return res;
 };
+
+type GetPclAttrEntriesApiReq = {
+  pcl_cd: string;
+};
+type GetPclAttrEntriesApiRes = {
+  message: string;
+  result: Result;
+  data: {
+    atp_is_common: string;
+    attr: {
+      atr_cd: string;
+      atr_name: string;
+      atr_is_with_unit: string;
+      atr_control_type: string;
+      atr_not_null: string;
+      atr_max_length: number | null;
+      atr_select_list: string;
+      atr_default_value: string;
+      atr_unit: string;
+    };
+  }[];
+};
+
+export const getPclAttrEntriesApi = async ({
+  pcl_cd,
+}: GetPclAttrEntriesApiReq): Promise<GetPclAttrEntriesApiRes> => {
+  const url = `/atp/pclattrs/entries?pcl=${pcl_cd}`;
+  const res = await fetchRequest(url, "GET");
+  return res;
+};
+
+type GetPclEntriesApiRes = {
+  message: string;
+  result: Result;
+  data: { pcl_cd: string; pcl_name: string }[];
+};
+export const GetPclEntriesApi = async (): Promise<GetPclEntriesApiRes> => {
+  const url = `/atp/pcl/entries`;
+  const res = await fetchRequest(url, "GET");
+  return res;
+};
+
 export type PclDetail = {
   pcl_cd: string;
   pcl_name: string;
@@ -157,7 +198,7 @@ type UpdatePclApiRes = {
 export const updatePclApi = async ({
   body,
 }: UpdatePclApiReq): Promise<UpdatePclApiRes> => {
-  const url = `/atp/pclattrs/udpate`;
+  const url = `/atp/pclattrs/update`;
   const res = await fetchRequest(url, "POST", body);
   return res;
 };

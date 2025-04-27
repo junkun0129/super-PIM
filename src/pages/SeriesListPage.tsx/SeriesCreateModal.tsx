@@ -1,12 +1,13 @@
 import React, { ReactNode, useEffect, useState } from "react";
-import AppModal from "../../AppModal/AppModal";
-import AppDropDownList from "../../AppDropDownList/AppDropDownList";
-import pclApi from "../../../api_dev/pcl.api";
-import attrsApi, { CreateProductAttr } from "../../../api_dev/attrs.api";
-import seriesApi from "../../../api_dev/series.api";
-import AppButton from "../../AppButton/AppButton";
-import AppAttrInput from "../../AppAttrInput/AppAttrInput";
-import { useMessageContext } from "../../../providers/MessageContextProvider";
+import AppModal from "../../components/AppModal/AppModal";
+import AppDropDownList from "../../components/AppDropDownList/AppDropDownList";
+
+import AppButton from "../../components/AppButton/AppButton";
+import AppAttrInput from "../../components/AppAttrInput/AppAttrInput";
+import { useMessageContext } from "../../providers/MessageContextProvider";
+import { getPclAttrEntriesApi, GetPclEntriesApi } from "../../api/pcl.api";
+import { checkProductApi, createProductApi } from "../../api/product.api";
+import { runWithConcurrency } from "../../util";
 type Props = {
   open: boolean;
   onClose: () => void;
@@ -16,18 +17,29 @@ type Props = {
 export type CreatedSeriesEntry = {
   pcl_cd: string;
   pcl_name: string;
-  series_cd: string;
+  series_hinban: string;
   series_name: string;
-  attrs: { cd: string; value: string; name: string }[];
+  attrs: { cd: string; value: string; name: string; unit?: string }[];
+};
+
+type CreateProductAttr = {
+  cd: string;
+  name: string;
+  is_with_unit: string;
+  unit: string;
+  control_type: string;
+  not_null: string;
+  max_length: number | null;
+  selected_list: string;
+  default_value: string;
+  is_common: string;
 };
 const SeriesCreateModal = ({ open, onClose, updateList }: Props) => {
   const [dropdownOpen, setdropdownOpen] = useState(false);
   const [dropdownOptions, setdropdownOptions] = useState<
     { cd: string; label: string }[]
   >([]);
-  const { getPclsApi } = pclApi;
-  const { checkSeriesExists, createSeriesApi } = seriesApi;
-  const { getProductCreateAttrPclListApi } = attrsApi;
+
   const { setMessage } = useMessageContext();
   const [selectedPcl, setselectedPcl] = useState<{
     cd: string;
@@ -41,57 +53,89 @@ const SeriesCreateModal = ({ open, onClose, updateList }: Props) => {
     getAttrList(selectedPcl.cd);
   }, [selectedPcl]);
 
+  useEffect(() => {
+    if (!open) {
+      setdropdownOptions([]);
+      setselectedPcl(null);
+      setattrList([]);
+      setseriesList([]);
+    }
+  }, [open]);
+
   const getAttrList = async (pcl_cd: string) => {
-    const res = await getProductCreateAttrPclListApi({ pcl_cd });
+    const res = await getPclAttrEntriesApi({ pcl_cd });
     if (res.result !== "success") return;
-    setattrList(res.data.filter((item) => item.is_common === "1"));
+    setattrList(
+      res.data
+        .filter((item) => item.atp_is_common === "1")
+        .map((item) => ({
+          cd: item.attr.atr_cd,
+          is_common: item.atp_is_common,
+          name: item.attr.atr_name,
+          is_with_unit: item.attr.atr_is_with_unit,
+          unit: item.attr.atr_unit,
+          not_null: item.attr.atr_not_null,
+          control_type: item.attr.atr_control_type,
+          default_value: item.attr.atr_default_value,
+          max_length: item.attr.atr_max_length,
+          selected_list: item.attr.atr_select_list,
+        }))
+    );
   };
+
   const handleSelectPcl = (cd) => {
-    setdropdownOpen(false);
     const pcl = dropdownOptions.find((item) => item.cd === cd);
     if (!pcl) return;
     setselectedPcl(pcl);
+    setdropdownOpen(false);
   };
+
   const handleClick = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     e.preventDefault();
 
-    const res = await getPclsApi();
+    const res = await GetPclEntriesApi();
+    if (res.result !== "success") return;
     setdropdownOptions(
-      res.data.map((item) => ({ cd: item.cd, label: item.pcl_name }))
+      res.data.map((item) => ({
+        cd: item.pcl_cd,
+        label: item.pcl_name,
+      }))
     );
     setdropdownOpen(true);
   };
+
   const handleAddToSeriesList = async (
     e: React.FormEvent<HTMLFormElement>,
     seriesList: CreatedSeriesEntry[]
   ) => {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
-    const series_cd = form.get("cd") as string;
+    const series_hinban = form.get("cd") as string;
     const series_name = form.get("name") as string;
 
-    if (series_cd === "") {
+    if (series_hinban === "") {
       return setMessage("シリーズコードを入力してください");
     }
 
     if (series_name === "") {
       return setMessage("シリーズ名を入力してください");
     }
-    const res = await checkSeries(series_cd, series_name, seriesList);
+    const res = await checkSeries(series_hinban, series_name, seriesList);
 
     if (res.result !== "success") return setMessage(res.message);
     const newSeriesEntry: CreatedSeriesEntry = {
       pcl_cd: selectedPcl.cd,
       pcl_name: selectedPcl.label,
-      series_cd,
+      series_hinban,
       series_name,
       attrs: attrList.map((attr, i) => {
         return {
           cd: attr.cd,
           value: form.get(attr.cd) as string,
           name: attr.name,
+          unit: attr.unit ?? "",
         };
       }),
     };
@@ -104,11 +148,16 @@ const SeriesCreateModal = ({ open, onClose, updateList }: Props) => {
     cd: string,
     name: string,
     list: CreatedSeriesEntry[]
-  ) => {
-    const res = await checkSeriesExists(cd, name);
+  ): Promise<{ result: string; message?: string }> => {
+    const res = await checkProductApi({
+      body: {
+        pr_hinban: cd,
+        pr_name: name,
+      },
+    });
     if (res.result !== "success") return res;
     const doubledNames = list.filter((item) => item.series_name === name);
-    const doubeldCds = list.filter((item) => item.series_cd === cd);
+    const doubeldCds = list.filter((item) => item.series_hinban === cd);
     if (!!doubledNames.length)
       return { result: "failed", message: "シリーズ名が既に存在します" };
     if (!!doubeldCds.length)
@@ -117,13 +166,30 @@ const SeriesCreateModal = ({ open, onClose, updateList }: Props) => {
   };
 
   const handleCardClick = (series_cd: string) => {
-    const newfilter = seriesList.filter((item) => item.series_cd !== series_cd);
+    const newfilter = seriesList.filter(
+      (item) => item.series_hinban !== series_cd
+    );
     setseriesList(newfilter);
   };
 
   const handleCreateSeries = async () => {
-    const res = await createSeriesApi({ body: seriesList });
-    if (res.result !== "success") return;
+    const createPromises = seriesList.map((item) => () => {
+      return createProductApi({
+        body: {
+          is_series: "1",
+          pr_name: item.series_name,
+          pr_hinban: item.series_hinban,
+          ctg_cd: "",
+          pcl_cd: item.pcl_cd,
+          attrvalues: item.attrs.map((attr) => ({
+            atr_cd: attr.cd,
+            atv_value: attr.value,
+          })),
+        },
+      });
+    });
+    const res = await runWithConcurrency(createPromises, 10);
+    if (res.some((item) => item.result === "failed")) return;
     setMessage("シリーズが作成されました。");
     setseriesList([]);
     onClose();
@@ -131,33 +197,34 @@ const SeriesCreateModal = ({ open, onClose, updateList }: Props) => {
   };
   return (
     <AppModal title={"シリーズ作成"} open={open} onClose={onClose}>
-      <div className="flex h-[400px]">
+      <div className="flex h-[400px] ">
         {/* input form */}
-        <div className=" w-[400px] relative mx-5">
-          <div className="flex justify-between w-full">
-            <div className="p-1 font-bold w-1/2">商品分類</div>
-            <AppDropDownList
-              className="w-1/2"
-              open={dropdownOpen}
-              onClose={() => setdropdownOpen(false)}
-              onSelect={handleSelectPcl}
-              options={dropdownOptions}
-            >
-              <button
-                className="w-full border border-slate-500 rounded-sm p-1 px-2 flex justify-between"
-                onClick={(e) => handleClick(e)}
+        <form
+          className=" flex flex-col justify-between"
+          onSubmit={(e) => handleAddToSeriesList(e, seriesList)}
+        >
+          <div className=" w-[400px]  mx-5 overflow-auto h-full">
+            <div className="flex justify-between w-full">
+              <div className="p-1 font-bold w-1/2 ">属性セット</div>
+              <AppDropDownList
+                className="w-1/2"
+                open={dropdownOpen}
+                onClose={() => setdropdownOpen(false)}
+                onSelect={handleSelectPcl}
+                options={dropdownOptions}
               >
-                <div>{selectedPcl && selectedPcl.label}</div>
-                <div className=" rotate-90 bg-white">＞</div>
-              </button>
-            </AppDropDownList>
-          </div>
-          <div>
+                <button
+                  className="w-full border border-slate-500 rounded-sm p-1 px-2 flex justify-between"
+                  onClick={(e) => handleClick(e)}
+                >
+                  <div>{selectedPcl && selectedPcl.label}</div>
+                  <div className=" rotate-90 bg-white">＞</div>
+                </button>
+              </AppDropDownList>
+            </div>
+
             {selectedPcl && (
-              <form
-                className="w-full"
-                onSubmit={(e) => handleAddToSeriesList(e, seriesList)}
-              >
+              <>
                 <div className="w-full flex justify-between mt-2">
                   <label className="p-1 w-1/2 font-bold">シリーズコード</label>
                   <input
@@ -175,35 +242,45 @@ const SeriesCreateModal = ({ open, onClose, updateList }: Props) => {
                   />
                 </div>
 
-                {attrList.map((item) => {
-                  return (
-                    <div
-                      key={item.name}
-                      className="w-full flex justify-between mt-2"
-                    >
-                      <label className="p-1 w-1/2 font-bold">{item.name}</label>
-                      <AppAttrInput
-                        cd={item.cd}
-                        className="w-1/2"
-                        control_type={item.control_type}
-                        value={item.default_value}
-                        select_list={item.select_list}
-                      />
-                    </div>
-                  );
-                })}
-                <div className="flex justify-end py-2 absolute bottom-0 right-0">
-                  <AppButton
-                    text={"追加"}
-                    type="primary"
-                    isForm={true}
-                    onClick={() => console.log("object")}
-                  ></AppButton>
+                <div>
+                  {attrList.map((item) => {
+                    return (
+                      <div
+                        key={item.cd}
+                        className="w-full flex justify-between mt-2"
+                      >
+                        <label className="p-1 w-1/2 font-bold">
+                          {item.name}
+                        </label>
+                        <AppAttrInput
+                          cd={item.cd}
+                          className="w-1/2"
+                          control_type={item.control_type}
+                          required={item.not_null === "1" ? true : false}
+                          {...(!!item.max_length
+                            ? { maxLength: item.max_length }
+                            : {})}
+                          default_value={item.default_value}
+                          select_list={item.selected_list}
+                          unit={item.unit}
+                          is_with_unit={item.is_with_unit}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
-              </form>
+              </>
             )}
           </div>
-        </div>
+          <AppButton
+            text={"追加"}
+            type="primary"
+            className="w-[100%] mt-5"
+            isForm={true}
+            disabled={!selectedPcl}
+            onClick={() => console.log("object")}
+          ></AppButton>
+        </form>
         {/* vertical line */}
         {!!seriesList.length && (
           <div className="border-r border-gray-300 h-full mx-5"></div>
@@ -225,7 +302,7 @@ const SeriesCreateModal = ({ open, onClose, updateList }: Props) => {
                 className="rounded-md bg-gray-200 p-5 py-2 shadow-md my-3 w-full"
               >
                 <div className="flex justify-end">
-                  <button onClick={() => handleCardClick(series.series_cd)}>
+                  <button onClick={() => handleCardClick(series.series_hinban)}>
                     ✕
                   </button>
                 </div>
@@ -235,12 +312,12 @@ const SeriesCreateModal = ({ open, onClose, updateList }: Props) => {
                 </div>
                 <div className="border-b border-gray-300 my-1"></div>
                 <div className="flex w-full">
-                  <div className="w-1/2 font-bold">シリーズコード</div>
-                  <div>{series.series_cd}</div>
+                  <div className="w-1/2 font-bold">商品コード</div>
+                  <div>{series.series_hinban}</div>
                 </div>
                 <div className="border-b border-gray-300 my-1"></div>
                 <div className="flex w-full">
-                  <div className="w-1/2 font-bold">商品分類</div>
+                  <div className="w-1/2 font-bold">属性セット</div>
                   <div>{series.pcl_name}</div>
                 </div>
                 <div className="border-b border-gray-300 my-1"></div>
@@ -248,7 +325,9 @@ const SeriesCreateModal = ({ open, onClose, updateList }: Props) => {
                   <>
                     <div key={i} className="flex w-full">
                       <div className="w-1/2 font-bold">{attr.name}</div>
-                      <div>{attr.value}</div>
+                      <div>
+                        {attr.value} {attr.unit}
+                      </div>
                     </div>
                     <div className="border-b border-gray-300 my-1"></div>
                   </>

@@ -40,3 +40,21 @@ export const getCategoryListApi = async (): Promise<GetCategoryListApiRes> => {
   const res = await fetchRequest(url, "GET");
   return res;
 };
+
+type DeleteCategoryApiReq = {
+  body: {
+    ctg_cd: string;
+  };
+};
+
+type DeleteCategoryApiRes = {
+  result: string;
+  message: string;
+};
+export const deleteCategoryApi = async ({
+  body,
+}: DeleteCategoryApiReq): Promise<DeleteCategoryApiRes> => {
+  const url = `/category/delete`;
+  const res = await fetchRequest(url, "POST", body);
+  return res;
+};

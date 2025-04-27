@@ -5,12 +5,12 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { CategoryNode } from "../../data/categories/type";
 import { getLinkedCategoryArray } from "../../util";
+import { CategoryTree } from "../../api/category.api";
 
 type Props = {
   selectedKeys: string[];
-  options: CategoryNode[];
+  options: CategoryTree[];
   open: boolean;
   onSelect: (keys: { key: string; value: string }[]) => void;
   children: ReactNode;
@@ -57,18 +57,18 @@ const AppCategoryCascader = ({
     const newKeys = selectedKeys.slice();
     const newEntries = newKeys.map((key) => {
       const node = findNodeByCd(key, options);
-      return { key, value: node?.name || "" };
+      return { key, value: node?.ctg_name || "" };
     });
     setActiveEntries([{ key: "first", value: "first" }, ...newEntries]);
   }, [selectedKeys]);
 
   const handleClick = (
-    node: CategoryNode,
+    node: CategoryTree,
     index: number,
     entries: { key: string; value: string }[]
   ) => {
     const newActiveEntriess = entries.slice(0, index + 1);
-    newActiveEntriess.push({ key: node.cd, value: node.name });
+    newActiveEntriess.push({ key: node.ctg_cd, value: node.ctg_name });
     setActiveEntries(newActiveEntriess);
     if (!node.children.length) {
       onSelect(newActiveEntriess.filter((item) => item.key !== "first"));
@@ -86,24 +86,27 @@ const AppCategoryCascader = ({
           {activeEntries.map(({ key, value }, i) => {
             const nodeOptions =
               key === "first" ? options : findNextNodeByCd(key, options);
-            if (!nodeOptions.length) return;
+            if (!nodeOptions || !nodeOptions.length) return;
             return (
               <div className="" key={key + i}>
                 {nodeOptions.map((node) => (
-                  <div
+                  <button
+                    className="flex flex-col w-full  items-start px-2 py-1 hover:bg-slate-100"
                     style={
-                      activeEntries.map((item) => item.key).includes(node.cd)
-                        ? { backgroundColor: "lightblue" }
+                      activeEntries
+                        .map((item) => item.key)
+                        .includes(node.ctg_cd)
+                        ? { backgroundColor: "#c6d9e8" }
                         : {}
                     }
                     onClick={(e) => {
                       e.stopPropagation();
                       handleClick(node, i, activeEntries);
                     }}
-                    key={node.cd}
+                    key={node.ctg_cd}
                   >
-                    {node.name}
-                  </div>
+                    {node.ctg_name}
+                  </button>
                 ))}
               </div>
             );
@@ -118,10 +121,10 @@ export default AppCategoryCascader;
 
 function findNodeByCd(
   cd: string,
-  nodes: CategoryNode[]
-): CategoryNode | undefined {
+  nodes: CategoryTree[]
+): CategoryTree | undefined {
   for (const node of nodes) {
-    if (node.cd === cd) {
+    if (node.ctg_cd === cd) {
       return node;
     }
     if (node.children) {
@@ -136,10 +139,10 @@ function findNodeByCd(
 
 function findNextNodeByCd(
   cd: string,
-  nodes: CategoryNode[]
-): CategoryNode[] | undefined {
+  nodes: CategoryTree[]
+): CategoryTree[] | undefined {
   for (const node of nodes) {
-    if (node.cd === cd) {
+    if (node.ctg_cd === cd) {
       return node.children;
     }
     if (node.children) {

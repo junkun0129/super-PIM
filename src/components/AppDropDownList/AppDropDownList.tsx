@@ -28,7 +28,6 @@ const AppDropDownList = ({
       if (!openProps) {
         setopen(false);
       }
-      onClose();
     }
   };
   useEffect(() => {
@@ -65,13 +64,15 @@ const AppDropDownList = ({
     <div className={"relative " + className}>
       {clonedChildren}
       {open && (
-        <div ref={ref} className="absolute border z-50  bg-white shadow-md">
+        <div
+          ref={ref}
+          className="absolute border z-50  bg-white shadow-md flex flex-col"
+        >
           {options.map((option, i) => (
-            <div
-              className="rounded p-3"
+            <button
+              className="p-3 hover:bg-slate-100 flex"
               key={i}
               onClick={(e) => {
-                console.log("object");
                 e.stopPropagation();
                 onSelect(option.cd);
                 if (!openProps) {
@@ -80,7 +81,7 @@ const AppDropDownList = ({
               }}
             >
               {option.label}
-            </div>
+            </button>
           ))}
         </div>
       )}

@@ -6,6 +6,7 @@ type AppButtonProps = {
   isForm?: boolean;
   className?: string;
   disabled?: boolean;
+  badgeNum?: number;
 };
 const AppButton = ({
   text,
@@ -14,9 +15,10 @@ const AppButton = ({
   isForm = false,
   className: classNameProps,
   disabled = false,
+  badgeNum = 0,
 }: AppButtonProps) => {
   let className =
-    "px-2 py-1 text-sm rounded-sm border h-[40px] border-slate-500 hover:-translate-y-[2px] active:translate-y-0 hover:shadow-md ";
+    "relative px-2 py-1 text-sm rounded-sm border h-[40px] border-slate-500 hover:-translate-y-[2px] active:translate-y-0 hover:shadow-md ";
 
   if (classNameProps) {
     className += classNameProps;
@@ -36,6 +38,11 @@ const AppButton = ({
       type={isForm ? "submit" : "button"}
     >
       {text}
+      {badgeNum > 0 && (
+        <div className="bg-red-600 text-sm absolute w-[25px] h-[25px] flex items-center justify-center text-white rounded-full -top-3 -right-2">
+          {badgeNum}
+        </div>
+      )}
     </button>
   );
 };

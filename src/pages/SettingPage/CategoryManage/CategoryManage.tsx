@@ -18,6 +18,8 @@ const CategoryManage = () => {
   const [categories, setcategories] = useState<CategoryTree[]>([]);
   const { getAllCategoriesApi, updateCategoryOrderApi } = categoryApis;
   const [isFirstInputOn, setisFirstInputOn] = useState<boolean>(false);
+  const [isRootInputOpen, setisRootInputOpen] = useState<boolean>(false);
+  const [rootCreateInput, setrootCreateInput] = useState<string>("");
   const { setMessage } = useMessageContext();
   useEffect(() => {
     getCategories();
@@ -64,8 +66,45 @@ const CategoryManage = () => {
     getCategories();
   };
 
+  const handleRootCreate = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    const value = e.target.value;
+    if (!value) return setisRootInputOpen(false);
+
+    const res = await createCategoryApi({
+      body: {
+        ctg_name: value,
+        parent_cd: "",
+      },
+    });
+    setMessage(res.message);
+    setisRootInputOpen(false);
+    setrootCreateInput("");
+    getCategories();
+  };
+
   return (
     <div className="w-full h-full">
+      <AppButton
+        text={"＋ ルートカテゴリを作成する"}
+        onClick={() => setisRootInputOpen(true)}
+        className="ml-4 mt-2 mb-4"
+        type={"primary"}
+      />
+      {isRootInputOpen && (
+        <div className=" flex p-3 border border-slate-500 m-3  rounded-md shadow-lg">
+          <input
+            type={"text"}
+            className="p-1 px-2 text-md w-[50%]"
+            placeholder="作成するカテゴリ名を入力してください"
+            autoFocus={true}
+            name={""}
+            value={rootCreateInput}
+            onChange={(e) => setrootCreateInput(e.target.value)}
+            onBlur={handleRootCreate}
+          />
+        </div>
+      )}
       {categories.length ? (
         <AppSortable
           layerCd="rootcategory"

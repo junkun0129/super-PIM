@@ -13,11 +13,14 @@
   font-size: 16px;
   font-family: "notsan";
   color: rgb(56, 56, 56);
-  caret-color: transparent;
 }
 
 table,
 th,
 td {
   border: 1px solid black;
+}
+
+.table-drag-hover {
+  background-color: lightblue !important;
 }

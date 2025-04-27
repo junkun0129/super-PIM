@@ -85,7 +85,7 @@ export const padZero = (num: number): string => {
 export const setCookie = (name: string, value: string, days: number = 1) => {
   const date = new Date();
   date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-  document.cookie = `${name}=${value};expires=${date.toUTCString()}`;
+  document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
 };
 
 export const resetAllCookies = () => {
@@ -258,7 +258,6 @@ export function moveBehindByKey<T extends Record<string, any>>(
 
 export function changeOrderByOrder<T extends Record<string, any>>(
   arr: T[],
-
   orderKey: keyof T
 ) {
   if (arr.map((item) => item[orderKey]).some((item) => isNaN(item))) return arr;

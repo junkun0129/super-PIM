@@ -113,6 +113,9 @@ function AppTable<T extends Object>({
         className="w-4 h-4 flex justify-center items-center"
         type="checkbox"
         checked={selectedKeysProps.includes(item["cd"])}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
         onChange={(e) => {
           e.stopPropagation();
           const isChecked = (e.target as HTMLInputElement).checked;
@@ -151,33 +154,34 @@ function AppTable<T extends Object>({
       }
     }
   };
-
+  const handleDragEnd = (event: React.DragEvent<HTMLTableRowElement>) => {
+    const allHovered = document.querySelectorAll(".tbc");
+    allHovered.forEach((el) => {
+      (el as HTMLElement).style.backgroundColor = "";
+    });
+  };
   const handleDragStart = (
-    event: React.DragEvent<HTMLTableCellElement>,
+    event: React.DragEvent<HTMLTableRowElement>,
     newActiveCd: string
   ) => {
     setactiveCd(newActiveCd);
   };
-  const handleDragLeave = (
-    event: React.DragEvent<HTMLTableCellElement>,
-    cd: string
-  ) => {
-    const div = event.view.document.getElementsByClassName(cd);
-    if (div && div.length > 0) {
-      (div[0] as HTMLElement).style.backgroundColor = "";
-    }
+  const handleDragLeave = (event: React.DragEvent<HTMLTableRowElement>) => {
+    const current = event.currentTarget as HTMLElement;
+    const related = event.relatedTarget as HTMLElement | null;
+
+    // relatedTarget が currentTarget の内部にまだあるなら、離れてないとみなす
+    if (related && current.contains(related)) return;
+
+    current.style.backgroundColor = "";
   };
-  const handleDragEnter = (
-    event: React.DragEvent<HTMLTableCellElement>,
-    cd: string
-  ) => {
-    const div = event.view.document.getElementsByClassName(cd);
-    if (div && div.length > 0) {
-      (div[0] as HTMLElement).style.backgroundColor = "lightblue";
-    }
+
+  const handleDragEnter = (event: React.DragEvent<HTMLTableRowElement>) => {
+    (event.currentTarget as HTMLElement).style.backgroundColor = "#c6d9e8 ";
   };
+
   const handleDrop = (
-    event: React.DragEvent<HTMLTableCellElement>,
+    event: React.DragEvent<HTMLTableRowElement>,
     cd: string
   ) => {
     const div = event.view.document.getElementsByClassName(cd);
@@ -192,7 +196,7 @@ function AppTable<T extends Object>({
   };
 
   const handleDragOver = (
-    event: React.DragEvent<HTMLTableCellElement>,
+    event: React.DragEvent<HTMLTableRowElement>,
     newOverCd: string
   ) => {
     event.preventDefault();
@@ -219,43 +223,48 @@ function AppTable<T extends Object>({
           </tr>
         </thead>
         <tbody>
-          {dataSource.map((row, rowIndex) => (
-            <tr className={`${row["cd"]}-tr hover:bg-gray-200`} key={rowIndex}>
-              {columns.map((column, colIndex) => {
-                const cellValue = row[column.accessor];
-                return (
-                  <td
-                    style={column.accessor === "check" ? { width: "0px" } : {}}
-                    draggable={
-                      draggableAccesor && draggableAccesor === column.accessor
-                        ? true
-                        : false
-                    }
-                    onClick={(e) => {
-                      if (
-                        draggableAccesor &&
-                        draggableAccesor === column.accessor
-                      ) {
-                        e.stopPropagation();
+          {dataSource.map((row, rowIndex) => {
+            const isDraggableRow = draggableAccesor !== undefined;
+            return (
+              <tr
+                key={rowIndex}
+                draggable={isDraggableRow}
+                onClick={() => handleRowClick(row)}
+                onDragStart={(e) => handleDragStart(e, row["cd"])}
+                onDrop={(e) => handleDrop(e, row["cd"])}
+                onDragEnter={(e) => handleDragEnter(e)}
+                onDragLeave={(e) => handleDragLeave(e)}
+                onDragOver={(e) => handleDragOver(e, row["cd"])}
+                onDragEnd={(e) => handleDragEnd(e)}
+                className={`tbc ${
+                  row["cd"]
+                }-tr hover:bg-gray-200 transition-shadow ${
+                  activeCd === row["cd"] ? "shadow-lg scale-[1.01]" : ""
+                }`}
+                style={{ cursor: isDraggableRow ? "grab" : "default" }}
+              >
+                {columns.map((column, colIndex) => {
+                  const cellValue = row[column.accessor];
+                  return (
+                    <td
+                      key={colIndex + rowIndex}
+                      className="px-3 py-2 border border-gray-400 "
+                      style={
+                        column.accessor === "check" ? { width: "0px" } : {}
                       }
-
-                      if (column.accessor === "check") return;
-                      handleRowClick(row);
-                    }}
-                    onDragStart={(e) => handleDragStart(e, row["cd"])}
-                    onDrop={(e) => handleDrop(e, row["cd"])}
-                    onDragEnter={(e) => handleDragEnter(e, row["cd"])}
-                    onDragLeave={(e) => handleDragLeave(e, row["cd"])}
-                    onDragOver={(e) => handleDragOver(e, row["cd"])}
-                    className="px-3 py-2  border-gray-400 border "
-                    key={colIndex + rowIndex}
-                  >
-                    {isReactNode(cellValue) ? cellValue : String(cellValue)}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
+                      onClick={(e) => {
+                        if (column.accessor !== "check") {
+                          handleRowClick(row);
+                        }
+                      }}
+                    >
+                      {isReactNode(cellValue) ? cellValue : String(cellValue)}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 

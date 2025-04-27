@@ -8,6 +8,7 @@ import {
   CategoryNode,
   CategoryTree,
   createCategoryApi,
+  deleteCategoryApi,
 } from "../../api/category.api";
 import AppInput from "../AppInput/AppInput";
 type Props = {
@@ -29,6 +30,7 @@ const AppCategoryTree = ({ node, updateCategoryTree, updateOrder }: Props) => {
   const [nameInput, setnameInput] = useState("");
   const ref = useRef();
   const handleClick = (e) => {
+    e.stopPropagation();
     setisOpen((pre) => {
       return !pre;
     });
@@ -39,6 +41,7 @@ const AppCategoryTree = ({ node, updateCategoryTree, updateOrder }: Props) => {
   };
 
   const handleOnBlur = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation();
     const value = e.target.value;
     if (!value) return setisAdd(false);
 
@@ -49,6 +52,14 @@ const AppCategoryTree = ({ node, updateCategoryTree, updateOrder }: Props) => {
       },
     });
     setMessage(res.message);
+    setisAdd(false);
+    setnameInput("");
+    updateCategoryTree();
+  };
+
+  const handleDelete = async () => {
+    const res = await deleteCategoryApi({ body: { ctg_cd: node.ctg_cd } });
+    setMessage(res.message);
     updateCategoryTree();
   };
   return (
@@ -56,10 +67,10 @@ const AppCategoryTree = ({ node, updateCategoryTree, updateOrder }: Props) => {
       onMouseOver={() => setisMouseOver(true)}
       onMouseLeave={() => setisMouseOver(false)}
       id={node.ctg_cd}
-      className="draggable drag-node ml-4"
+      className="draggable drag-node ml-4 "
       onClick={handleClick}
     >
-      <div className="flex items-center px-3 py-1  border-slate-500 border-2  my-4  rounded-md shadow-lg">
+      <div className="flex items-center px-3 py-1 y-4  rounded-md shadow-md border border-slate-300 hover:bg-slate-200">
         <button
           className="text-lg text-slate-500"
           style={{
@@ -73,13 +84,18 @@ const AppCategoryTree = ({ node, updateCategoryTree, updateOrder }: Props) => {
         {isMouseOver && (
           <button
             onClick={handleAdd}
-            className="px-2 rounded-sm bg-slate-500 text-black"
+            className="px-2 rounded-md text-lg  text-slate-500 hover:bg-slate-300 ml-4"
           >
             +
           </button>
         )}
         {isMouseOver && (
-          <div className="px-1 rounded-sm bg-white text-black ml-3">🗑️</div>
+          <div
+            onClick={handleDelete}
+            className="px-1 rounded-md text-slate-500 hover:bg-slate-300 ml-1 text-sm p-1 "
+          >
+            削除
+          </div>
         )}
       </div>
       <div>
@@ -90,6 +106,8 @@ const AppCategoryTree = ({ node, updateCategoryTree, updateOrder }: Props) => {
           >
             <input
               type={"text"}
+              className="p-1 px-2 text-md w-[50%]"
+              placeholder="作成するカテゴリ名を入力してください"
               autoFocus={true}
               name={""}
               value={nameInput}

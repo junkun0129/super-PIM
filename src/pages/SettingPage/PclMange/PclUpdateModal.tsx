@@ -16,6 +16,7 @@ import {
   flagToBoolean,
   moveBehindByKey,
 } from "../../../util";
+import { useMessageContext } from "../../../providers/MessageContextProvider";
 type Props = {
   selectedPclKey: string | null;
   onClose: () => void;
@@ -25,10 +26,13 @@ type Row = {
   cd: string;
   action: ReactNode;
   name: string;
-  order: ReactNode;
+  order: number;
   alter_name: ReactNode;
   is_common: ReactNode;
   is_show: ReactNode;
+  alter_name_value: string;
+  is_common_value: string;
+  is_show_value: string;
 };
 
 const columns: Column<Row>[] = [
@@ -39,17 +43,13 @@ const columns: Column<Row>[] = [
   { accessor: "is_show", header: "非表示にする" },
 ];
 type UpdatedRowData = {
-  cd: string;
-  alter_name: string;
-  is_show: string;
-  is_common: string;
-  order: number;
-};
-
-type UpdatedValueRowData = {
-  cd: string;
-  key: "alter_name" | "is_common" | "is_show";
-  value: string | number;
+  [atp_cd: string]: {
+    cd: string;
+    alter_name: string;
+    is_show: string;
+    is_common: string;
+    order: number;
+  };
 };
 
 const PclUpdateModal = ({ selectedPclKey, onClose, onUpdate }: Props) => {
@@ -57,20 +57,18 @@ const PclUpdateModal = ({ selectedPclKey, onClose, onUpdate }: Props) => {
   const [pageSize, setpageSize] = useState<number>(10);
   const [total, settotal] = useState(0);
   const [dataSource, setdataSource] = useState<Row[]>([]);
-  const [selectedKeys, setselectedKeys] = useState<string[]>([]);
-  const [updatedRowData, setupdatedRowData] = useState<Row[]>([]);
-  const [updatedTextData, setupdatedTextData] = useState<UpdatedValueRowData[]>(
-    []
-  );
+  const [updatedRowData, setupdatedRowData] = useState<UpdatedRowData>({});
+  const context = useMessageContext();
   const [pclName, setpclName] = useState<string>("");
-  const tableRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (selectedPclKey) {
       getPcl(selectedPclKey);
     }
     return () => {
       setdataSource([]);
-      setselectedKeys([]);
+      setupdatedRowData({});
+      setpclName("");
     };
   }, [selectedPclKey]);
 
@@ -78,28 +76,27 @@ const PclUpdateModal = ({ selectedPclKey, onClose, onUpdate }: Props) => {
     const res = await GetPclDetailApi({ pcl_cd });
     if (res.result !== "success") return;
     setpclName(res.data.pcl_name);
-    const newDataSource: Row[] = res.data.attrpcl.map((item) => {
+
+    const sortedAttrs = res.data.attrpcl.sort(
+      (a, b) => a.atp_order - b.atp_order
+    );
+    const newDataSource: Row[] = sortedAttrs.map((item) => {
       return {
         cd: item.atp_cd,
         name: item.attr.atr_name,
         action: <div className=" cursor-move">: : : : </div>,
-        order: (
-          <input
-            key={`${item.atp_cd}-atp_order`}
-            id={`${item.atp_cd}-atp_order`}
-            defaultValue={item.atp_order}
-            className="hidden"
-            name={item.atp_order.toString()}
-          />
-        ),
+        order: item.atp_order,
+        alter_name_value: item.atp_alter_name,
+        is_show_value: item.atp_is_common,
+        is_common_value: item.atp_is_common,
         alter_name: (
           <input
             key={`${item.atp_cd}-atp_alter_name`}
             id={`${item.atp_cd}-atp_alter_name`}
             defaultValue={item.atp_alter_name.toString()}
             name={`${item.atp_alter_name}`}
-            className="border border-slate-400 p-1px-2"
-            onBlur={(e) => handleBlur(e, "alter_name", item.atp_cd)}
+            className="border border-slate-400 p-1 px-2"
+            onBlur={(e) => handleBlur(e, "alter_name", item.atp_cd, "text")}
           />
         ),
         is_common: (
@@ -110,7 +107,7 @@ const PclUpdateModal = ({ selectedPclKey, onClose, onUpdate }: Props) => {
             name={item.atp_is_common}
             className="w-[20px] h-[20px] flex items-center"
             type="checkbox"
-            onBlur={(e) => handleBlur(e, "is_common", item.atp_cd)}
+            onBlur={(e) => handleBlur(e, "is_common", item.atp_cd, "check")}
           />
         ),
         is_show: (
@@ -121,7 +118,7 @@ const PclUpdateModal = ({ selectedPclKey, onClose, onUpdate }: Props) => {
             name={item.atp_is_show}
             className="w-[20px] h-[20px] flex items-center"
             type="checkbox"
-            onBlur={(e) => handleBlur(e, "is_show", item.atp_cd)}
+            onBlur={(e) => handleBlur(e, "is_show", item.atp_cd, "check")}
           />
         ),
       };
@@ -130,47 +127,79 @@ const PclUpdateModal = ({ selectedPclKey, onClose, onUpdate }: Props) => {
     setdataSource(newDataSource);
   };
 
+  useEffect(() => {
+    console.log(updatedRowData, "updatedRowData");
+  }, [updatedRowData]);
+
   const handleBlur = (
     e: React.FocusEvent<HTMLInputElement>,
-    key: "alter_name" | "is_common" | "is_show",
-    cd: string
+    key: string,
+    cd: string,
+    flag: "check" | "text"
   ) => {
-    let value: string | number;
-    if (key === "is_common" || key === "is_show") {
-      value = e.target.checked ? 1 : 0;
-    }
-
-    if (key === "alter_name") {
-      value = e.target.value;
-    }
-    setupdatedTextData((pre) => {
-      let newData: UpdatedValueRowData[];
-      if (pre.some((item) => item.cd === cd && item.key === key)) {
-        const newIncludedData = pre.map((item) => {
-          if (item.cd === cd && item.key === key) {
-            return { ...item, value };
-          }
-          return { ...item };
-        });
-        newData = [...newIncludedData];
-      } else {
-        newData = [...pre, { key, cd, value }];
+    setupdatedRowData((pre) => {
+      let newData = JSON.parse(JSON.stringify(pre));
+      if (flag === "text") {
+        newData[cd] = { ...newData[cd], [key]: e.target.value };
+      }
+      if (flag === "check") {
+        newData[cd] = { ...newData[cd], [key]: e.target.checked ? "1" : "0" };
       }
       return newData;
     });
+
+    setdataSource((pre) =>
+      pre.map((item) => {
+        if (item.cd === cd) {
+          return {
+            ...item,
+            [`${key}_value`]:
+              flag === "check"
+                ? !!e.target.checked
+                  ? "1"
+                  : "0"
+                : e.target.value,
+            [key]: (
+              <input
+                key={`${item.cd}-atp_${key}`}
+                {...(flag === "check"
+                  ? {
+                      defaultChecked: e.target.checked,
+
+                      type: "checkbox",
+                      className: "w-[20px] h-[20px] flex items-center",
+                    }
+                  : {})}
+                {...(flag === "text"
+                  ? {
+                      defaultValue: e.target.value,
+                      className: "border border-slate-400 p-1 px-2",
+                    }
+                  : {})}
+                id={`${item.cd}-atp_${key}`}
+                onBlur={(e) => handleBlur(e, key, item.cd, flag)}
+              />
+            ),
+          };
+        }
+        return {
+          ...item,
+        };
+      })
+    );
   };
 
   const handleDrop = ({
     activeCd,
     overCd,
     updatedRowData,
-    updatedTextData,
   }: {
     activeCd: string;
     overCd: string;
-    updatedTextData: UpdatedValueRowData[];
-    updatedRowData: Row[];
+
+    updatedRowData: UpdatedRowData;
   }) => {
+    //sort out by new order
     const swapedArray = moveBehindByKey(
       [...dataSource],
       activeCd,
@@ -180,92 +209,68 @@ const PclUpdateModal = ({ selectedPclKey, onClose, onUpdate }: Props) => {
 
     let newDataSource = changeOrderByOrder(swapedArray, "order");
 
-    if (updatedTextData.length) {
-      updatedTextData.forEach((item) => {
-        const index = newDataSource.findIndex((data) => data.cd === item.cd);
-        console.log(`${item.cd}-atp_${item.key}`);
-        if (index === -1) return;
-        newDataSource[index][item.key] = (
-          <input
-            key={`${item.cd}-atp_${item.key}`}
-            {...(item.key === "is_common" || item.key === "is_show"
-              ? {
-                  defaultChecked: !!item.value,
+    //update updatedrowData
+    let newUpdatedRowdata: UpdatedRowData = JSON.parse(
+      JSON.stringify(updatedRowData)
+    );
 
-                  type: "checkbox",
-                  className: "w-[20px] h-[20px] flex items-center",
-                }
-              : {})}
-            {...(item.key === "alter_name"
-              ? {
-                  defaultValue: item.value,
-                  className: "border border-slate-400 p-1px-2",
-                }
-              : {})}
-            name={item.value.toString()}
-            id={`${item.cd}-atp_${item.key}`}
-            data-row={";lkj"}
-            onBlur={(e) => handleBlur(e, item.key, item.key)}
-          />
-        );
-        console.log(newDataSource, "newdata");
-      });
-    }
-
-    let newUpdatedRowData: Row[] = [...updatedRowData];
-    newDataSource.forEach((newdata) => {
-      if (newUpdatedRowData.map((item) => item.cd).includes(newdata.cd)) {
-        const index = newUpdatedRowData.findIndex(
-          (item) => item.cd === newdata.cd
-        );
-        newUpdatedRowData[index] = newdata;
-      } else {
-        newUpdatedRowData.push(newdata);
-      }
-    });
-    setupdatedRowData(newUpdatedRowData);
-    setupdatedTextData([]);
-    setdataSource(newDataSource);
-  };
-
-  const handleSubmit = async (attrs: Row[], pcl_name: string) => {
-    if (!tableRef) return;
-
-    const newAttrs = attrs.map((attr) => {
-      const alterName = document
-        .getElementById(`${attr.cd}-atp_alter_name`)
-        ?.getAttribute("name");
-
-      const isShow = document
-        .getElementById(`${attr.cd}-atp_is_show`)
-        .getAttribute("name");
-      const isCommon = document
-        .getElementById(`${attr.cd}-atp_is_common`)
-        ?.getAttribute("name");
-      const order = document
-        .getElementById(`${attr.cd}-atp_order`)
-        ?.getAttribute("name");
-      return {
-        atp_cd: attr.cd,
-        atp_is_show: !!isShow ? "1" : "0",
-        atp_alter_name: alterName ? alterName.toString() : "",
-        atp_is_common: !!isCommon ? "1" : "0",
-        atp_order: isNaN(parseInt(order)) ? 0 : parseInt(order),
+    newDataSource.forEach((item) => {
+      newUpdatedRowdata[item.cd] = {
+        cd: item.cd,
+        alter_name: item.alter_name_value,
+        is_show: item.is_show_value,
+        is_common: item.is_common_value,
+        order: item.order,
       };
     });
 
-    console.log(newAttrs, "newattrs");
+    //update useState
+    setdataSource(newDataSource);
+    setupdatedRowData(newUpdatedRowdata);
+  };
+
+  const handleSubmit = async (
+    updatedRowData: UpdatedRowData,
+    dataSource: Row[],
+    pcl_name: string
+  ) => {
+    let attrsBody = [];
+    let newUpdatedRowdata: UpdatedRowData = JSON.parse(
+      JSON.stringify(updatedRowData)
+    );
+    dataSource.forEach((item) => {
+      newUpdatedRowdata[item.cd] = {
+        cd: item.cd,
+        alter_name: item.alter_name_value,
+        is_show: item.is_show_value,
+        is_common: item.is_common_value,
+        order: item.order,
+      };
+    });
+    const attrsArray = Object.values(newUpdatedRowdata);
+    if (attrsArray.length) {
+      attrsBody = attrsArray.map((attr) => ({
+        atp_cd: attr.cd,
+        atp_is_show: attr.is_show,
+        atp_alter_name: attr.alter_name,
+        atp_is_common: attr.is_common,
+        atp_order: attr.order,
+      }));
+    }
+
     const body = {
       pcl_cd: selectedPclKey,
       pcl_name,
-      attrs: newAttrs,
+      attrs: attrsBody,
     };
 
     const res = await updatePclApi({ body });
     if (res.result !== "success") return;
-    setselectedKeys([]);
+
     onClose();
     onUpdate();
+    getPcl(selectedPclKey);
+    context.setMessage(res.message);
   };
 
   return (
@@ -286,33 +291,31 @@ const PclUpdateModal = ({ selectedPclKey, onClose, onUpdate }: Props) => {
           label={"商品分類名"}
         />
       </div>
-      <div ref={tableRef}>
-        <AppTable
-          key={"cd"}
-          onRowClickKey={"cd"}
-          selectedKeys={selectedKeys}
-          onSelectedKeysChange={(keys) => setselectedKeys(keys)}
-          data={dataSource}
-          columns={columns}
-          onRowClick={function (id: string): void {
-            throw new Error("Function not implemented.");
-          }}
-          onDrop={({ activeCd, overCd }) =>
-            handleDrop({ activeCd, overCd, updatedRowData, updatedTextData })
-          }
-          checkable={false}
-          draggableAccesor="action"
-          currentPage={page}
-          pagination={pageSize}
-          total={10}
-          onCurrentPageChange={(page) => setpage(page)}
-          onPaginationChange={(pageSize) => setpageSize(pageSize)}
-        />
-      </div>
+
+      <AppTable
+        key={"cd"}
+        onRowClickKey={"cd"}
+        data={dataSource}
+        columns={columns}
+        onRowClick={function (id: string): void {
+          throw new Error("Function not implemented.");
+        }}
+        onDrop={({ activeCd, overCd }) =>
+          handleDrop({ activeCd, overCd, updatedRowData })
+        }
+        checkable={false}
+        draggableAccesor="action"
+        currentPage={page}
+        pagination={pageSize}
+        total={10}
+        onCurrentPageChange={(page) => setpage(page)}
+        onPaginationChange={(pageSize) => setpageSize(pageSize)}
+      />
+
       <AppButton
-        text={"確定"}
+        text={"更新"}
         isForm={true}
-        onClick={() => handleSubmit(updatedRowData, pclName)}
+        onClick={() => handleSubmit(updatedRowData, dataSource, pclName)}
         type={"primary"}
       />
     </AppModal>
