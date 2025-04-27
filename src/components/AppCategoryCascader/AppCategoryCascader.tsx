@@ -154,3 +154,37 @@ function findNextNodeByCd(
   }
   return undefined;
 }
+
+export function findCategoryPath(
+  tree: CategoryTree[],
+  targetCtgCd: string
+): string[] {
+  const path: string[] = [];
+
+  function dfs(node: CategoryTree, currentPath: string[]): boolean {
+    currentPath.push(node.ctg_cd);
+
+    if (node.ctg_cd === targetCtgCd) {
+      return true; // 見つかった！
+    }
+
+    if (node.children) {
+      for (const child of node.children) {
+        if (dfs(child, currentPath)) {
+          return true; // 子の中で見つかったらOK
+        }
+      }
+    }
+
+    currentPath.pop(); // 戻る（バックトラック）
+    return false;
+  }
+
+  for (const root of tree) {
+    if (dfs(root, path)) {
+      break; // 見つかったら終了
+    }
+  }
+
+  return path;
+}

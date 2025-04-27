@@ -85,12 +85,14 @@ const CategoryManage = () => {
 
   return (
     <div className="w-full h-full">
-      <AppButton
-        text={"＋ ルートカテゴリを作成する"}
-        onClick={() => setisRootInputOpen(true)}
-        className="ml-4 mt-2 mb-4"
-        type={"primary"}
-      />
+      {!!categories.length && (
+        <AppButton
+          text={"＋ ルートカテゴリを作成する"}
+          onClick={() => setisRootInputOpen(true)}
+          className="ml-4 mt-2 mb-4"
+          type={"primary"}
+        />
+      )}
       {isRootInputOpen && (
         <div className=" flex p-3 border border-slate-500 m-3  rounded-md shadow-lg">
           <input

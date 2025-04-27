@@ -2,10 +2,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { AppTabProps } from "../../components/AppTab/type";
 import AppTab from "../../components/AppTab/AppTab";
-import seriesApis, { SeriesDetail } from "../../api_dev/series.api";
+import seriesApis from "../../api_dev/series.api";
 import categoryApis from "../../api_dev/category.api";
 import { CategoryNode } from "../../data/categories/type";
-import AppCategoryCascader from "../../components/AppCategoryCascader/AppCategoryCascader";
+import AppCategoryCascader, {
+  findCategoryPath,
+} from "../../components/AppCategoryCascader/AppCategoryCascader";
 import { getObjectFromRowFormData } from "../../util";
 import { useMessageContext } from "../../providers/MessageContextProvider";
 import SkuListPage from "../SkuListPage/SkuListPage";
@@ -17,6 +19,12 @@ import AppDropDownList from "../../components/AppDropDownList/AppDropDownList";
 import pclApis from "../../api_dev/pcl.api";
 import attrApis from "../../api_dev/attrs.api";
 import productApis from "../../api_dev/product.api";
+import {
+  getProductDetailApi,
+  ProductAttr,
+  ProductDetail,
+} from "../../api/product.api";
+import { CategoryTree, getCategoryListApi } from "../../api/category.api";
 const SeriesDetailPage = () => {
   const { getSeriesDetailApi, getSeriesSkuListApi, updateSeriesApi } =
     seriesApis;
@@ -29,25 +37,37 @@ const SeriesDetailPage = () => {
   const { updateProductAttrsApi } = attrApis;
   const { updateProductPclApi } = productApis;
   const [isCategoryOpen, setisCategoryOpen] = useState(false);
-  const [categoryDataSource, setcategoryDataSource] = useState<CategoryNode[]>(
-    []
-  );
-  const [selectedKeys, setselectedKeys] = useState<string[]>([]);
+
   const { setMessage } = useMessageContext();
-  const [series, setseries] = useState<SeriesDetail>({
-    cd: "",
-    name: "",
-    description: "",
-    is_discontinued: "",
-    acpt_status: "",
-    hinban: "",
-    pcl_name: "",
-    attrs: [],
-    is_series: "",
+  const [series, setseries] = useState<ProductDetail>({
+    pr_cd: "",
+    pcl: {
+      pcl_name: "",
+    },
+    pr_name: "",
+    pr_hinban: "",
+    pr_is_discontinued: "",
+    pr_acpt_status: "",
+    pr_labels: "",
+    pr_created_at: "",
+    pr_updated_at: "",
+    pr_is_series: "",
+    pr_description: "",
+    categories: [
+      {
+        ctg_cd: "",
+      },
+    ],
   });
-  const [category, setcategory] = useState<string>("");
+  const [attrList, setattrList] = useState<ProductAttr[]>([]);
+
   let { series_cd } = useParams();
   const navigate = useNavigate();
+  const [categorylist, setcategorylist] = useState<CategoryTree[]>([]);
+  const [selectedCategoryKeys, setselectedCategoryKeys] = useState<string[]>(
+    []
+  );
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTabKey, setactiveTabKey] = useState("0");
   const [dropDownOptions, setdropDownOptions] = useState<
@@ -60,7 +80,6 @@ const SeriesDetailPage = () => {
 
   useEffect(() => {
     getSeries();
-    getCategory();
   }, []);
 
   useEffect(() => {
@@ -70,8 +89,11 @@ const SeriesDetailPage = () => {
   }, [searchParams]);
 
   const getSeries = async () => {
-    const newSeries = await getSeriesDetailApi(series_cd as string);
-    setseries(newSeries);
+    const res = await getProductDetailApi({ pr_cd: series_cd });
+    if (res.result !== "success") return;
+
+    setseries(res.data.product);
+    setattrList(res.data.attrvalues);
   };
 
   const tabdata: AppTabProps = useMemo(() => {
@@ -81,7 +103,7 @@ const SeriesDetailPage = () => {
         {
           key: "1",
           label: "項目",
-          content: <AppAttrList updateDetail={getSeries} product={series} />,
+          content: <AppAttrList updateDetail={getSeries} attrList={attrList} />,
         },
         {
           key: "2",
@@ -104,31 +126,18 @@ const SeriesDetailPage = () => {
   };
 
   const handleCategorybuttonClick = async () => {
-    const res = await getAllCategoriesApi();
+    const res = await getCategoryListApi();
     if (res.result !== "success") return;
 
-    setcategoryDataSource(res.data);
+    const newList = res.data;
+    setcategorylist(res.data);
+
     setisCategoryOpen(true);
+    if (!series.categories.length) return;
+    const keys = findCategoryPath(newList, series.categories[0].ctg_cd);
+    setselectedCategoryKeys(keys);
   };
 
-  const getCategory = async () => {
-    const res = await getProductCategoriesApi({
-      body: {
-        product_cd: series_cd,
-        media: "0",
-      },
-    });
-    if (res.result !== "success") return;
-    let newCategory = "";
-    res.data.map((item, i) => {
-      if (i !== 0) {
-        newCategory += " > ";
-      }
-      newCategory += item.name;
-    });
-    setcategory(newCategory);
-    setselectedKeys(res.data.map((item) => item.cd));
-  };
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     const formValue = getObjectFromRowFormData(event);
 
@@ -149,7 +158,6 @@ const SeriesDetailPage = () => {
     });
 
     getSeries();
-    getCategory();
     setMessage("シリーズの更新に成功しました");
   };
 
@@ -195,7 +203,7 @@ const SeriesDetailPage = () => {
                 <input
                   className="border border-slate-500 p-1 px-2"
                   name="name"
-                  defaultValue={series.name}
+                  defaultValue={series.pr_name}
                 />
               </div>
 
@@ -204,7 +212,7 @@ const SeriesDetailPage = () => {
                 <textarea
                   className="border border-slate-500 p-1 px-2 w-full"
                   name="description"
-                  defaultValue={series.description}
+                  defaultValue={series.pr_description}
                 />
               </div>
               <div>
@@ -218,7 +226,7 @@ const SeriesDetailPage = () => {
                     className="border border-slate-500 p-1 px-2 w-full text-left"
                     onClick={handleClick}
                   >
-                    {series.pcl_name}
+                    {series.pcl.pcl_name}
                   </button>
                 </AppDropDownList>
               </div>
@@ -226,13 +234,16 @@ const SeriesDetailPage = () => {
               <div>
                 <div className="font-bold mb-1 mt-4">カテゴリ</div>
                 <AppCategoryCascader
-                  selectedKeys={selectedKeys}
-                  options={categoryDataSource}
+                  selectedKeys={selectedCategoryKeys}
+                  options={categorylist}
                   open={isCategoryOpen}
                   onSelect={(entries) => {
-                    setselectedKeys(entries.map((item) => item.key));
+                    setselectedCategoryKeys(entries.map((item) => item.key));
+                    setseries((pre) => ({
+                      ...pre,
+                      categories: [{ ctg_cd: entries[entries.length - 1].key }],
+                    }));
                     setisCategoryOpen(false);
-                    setcategory(entries.map((item) => item.value).join(" > "));
                   }}
                   onClose={() => {
                     setisCategoryOpen(false);
@@ -242,7 +253,9 @@ const SeriesDetailPage = () => {
                     onClick={handleCategorybuttonClick}
                     className="border border-slate-500 p-1 px-2"
                   >
-                    {category}
+                    {!!series.categories.length
+                      ? "カテゴリあり"
+                      : "カテゴリなし"}
                   </div>
                 </AppCategoryCascader>
               </div>

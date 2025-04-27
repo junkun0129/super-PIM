@@ -25,7 +25,7 @@ const AppCategoryTree = ({ node, updateCategoryTree, updateOrder }: Props) => {
   const [isAdd, setisAdd] = useState(false);
   const [isMouseOver, setisMouseOver] = useState(false);
   const { updateCategoryOrderApi, createCaetgoryApi } = categoryApis;
-  const [hasChildren, setHasChildren] = useState(!!node.children?.length);
+  const hasChildren = !!node.children?.length;
   const { setMessage } = useMessageContext();
   const [nameInput, setnameInput] = useState("");
   const ref = useRef();
@@ -55,6 +55,7 @@ const AppCategoryTree = ({ node, updateCategoryTree, updateOrder }: Props) => {
     setisAdd(false);
     setnameInput("");
     updateCategoryTree();
+    setisOpen(true);
   };
 
   const handleDelete = async () => {
@@ -64,13 +65,15 @@ const AppCategoryTree = ({ node, updateCategoryTree, updateOrder }: Props) => {
   };
   return (
     <div
-      onMouseOver={() => setisMouseOver(true)}
-      onMouseLeave={() => setisMouseOver(false)}
       id={node.ctg_cd}
       className="draggable drag-node ml-4 "
       onClick={handleClick}
     >
-      <div className="flex items-center px-3 py-1 y-4  rounded-md shadow-md border border-slate-300 hover:bg-slate-200">
+      <div
+        onMouseOver={() => setisMouseOver(true)}
+        onMouseLeave={() => setisMouseOver(false)}
+        className="flex mt-1 bg-white items-center px-3 py-1 y-4  rounded-md shadow-md border border-slate-300 hover:bg-slate-200"
+      >
         <button
           className="text-lg text-slate-500"
           style={{
@@ -78,7 +81,7 @@ const AppCategoryTree = ({ node, updateCategoryTree, updateOrder }: Props) => {
             transform: isOpen ? `rotate(90deg)` : `rotate(0deg)`,
           }}
         >
-          {"⊳"}
+          {"➤"}
         </button>
         <div className=" mx-4">{node.ctg_name}</div>
         {isMouseOver && (

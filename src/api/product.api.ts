@@ -90,3 +90,58 @@ export const checkProductApi = async ({
   const res = await fetchRequest(url, "POST", body);
   return res;
 };
+type GetProductDetailApiReq = {
+  pr_cd: string;
+};
+export type ProductAttr = {
+  atv_cd: string;
+  atv_value: string;
+  attr: {
+    atr_cd: string;
+    atr_name: string;
+    atr_is_with_unit: string;
+    atr_unit: string;
+    atr_control_type: string;
+    atr_select_list: string;
+    atr_max_length?: number;
+    atr_not_null: string;
+    attrpcl: {
+      atp_is_common: string;
+      atp_order: number;
+    }[];
+  };
+};
+export type ProductDetail = {
+  pr_cd: string;
+  pcl: {
+    pcl_name: string;
+  };
+  pr_name: string;
+  pr_hinban: string;
+  pr_is_discontinued: string;
+  pr_acpt_status: string;
+  pr_labels: string;
+  pr_created_at: string;
+  pr_updated_at: string;
+  pr_is_series: string;
+  pr_description: string;
+  categories: {
+    ctg_cd: string;
+  }[];
+};
+
+type GetProductDetailApiRes = {
+  message: string;
+  result: string;
+  data: {
+    product: ProductDetail;
+    attrvalues: ProductAttr[];
+  };
+};
+export const getProductDetailApi = async ({
+  pr_cd,
+}: GetProductDetailApiReq): Promise<GetProductDetailApiRes> => {
+  const url = `/product/detail/${pr_cd}`;
+  const res = await fetchRequest(url, "GET");
+  return res;
+};
