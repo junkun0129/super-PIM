@@ -28,6 +28,7 @@ const AppDropDownList = ({
       if (!openProps) {
         setopen(false);
       }
+      onClose();
     }
   };
   useEffect(() => {

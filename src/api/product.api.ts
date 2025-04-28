@@ -125,6 +125,7 @@ export type ProductDetail = {
   pr_updated_at: string;
   pr_is_series: string;
   pr_description: string;
+  pcl_cd: string;
   categories: {
     ctg_cd: string;
   }[];
@@ -136,6 +137,9 @@ type GetProductDetailApiRes = {
   data: {
     product: ProductDetail;
     attrvalues: ProductAttr[];
+    asset: {
+      ast_img: string;
+    };
   };
 };
 export const getProductDetailApi = async ({
@@ -143,5 +147,66 @@ export const getProductDetailApi = async ({
 }: GetProductDetailApiReq): Promise<GetProductDetailApiRes> => {
   const url = `/product/detail/${pr_cd}`;
   const res = await fetchRequest(url, "GET");
+  return res;
+};
+
+type UpdateProductNameDescApiReq = {
+  body: {
+    pr_cd: string;
+    pr_name: string;
+    pr_description: string;
+  };
+};
+
+type UpdateProductNameDescApiRes = {
+  message: string;
+  result: string;
+};
+
+export const updateProductNameDescApi = async ({
+  body,
+}: UpdateProductNameDescApiReq): Promise<UpdateProductNameDescApiRes> => {
+  const url = `/product/update/namedesc`;
+  const res = await fetchRequest(url, "POST", body);
+  return res;
+};
+
+type UpdateProductPclApiReq = {
+  body: {
+    pr_cd: string;
+    pcl_cd: string;
+  };
+};
+
+type UpdateProductPclApiRes = {
+  message: string;
+  result: string;
+};
+
+export const updateProductPclApi = async ({
+  body,
+}: UpdateProductPclApiReq): Promise<UpdateProductPclApiRes> => {
+  const url = `/product/update/pcl`;
+  const res = await fetchRequest(url, "POST", body);
+  return res;
+};
+
+type UpdateProductCategoryApiReq = {
+  body: {
+    pr_cd: string;
+    ctg_cd: string;
+  };
+};
+
+type UpdateProductCategoryApiRes = {
+  message: string;
+  result: string;
+};
+
+export const updateProductCategoryApi = async ({
+  body,
+}: UpdateProductCategoryApiReq): Promise<UpdateProductCategoryApiRes> => {
+  const url = `/product/update/category`;
+  const res = await fetchRequest(url, "POST", body);
   return res;
 };

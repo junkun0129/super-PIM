@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 type MessageContext = {
   useMessage: () => void;
-  setMessage: (message: string) => void;
+  setMessage: (message: string | string[]) => void;
 };
 const MessageContext = createContext<MessageContext | undefined>(undefined);
 export const useMessageContext = () => {
@@ -13,7 +13,7 @@ export const useMessageContext = () => {
 };
 
 export const MessageContextProvider = ({ children }) => {
-  const [message, setMessage] = useState<string>("");
+  const [message, setMessage] = useState<string | string[]>("");
 
   useEffect(() => {
     if (message !== "") {
@@ -27,7 +27,16 @@ export const MessageContextProvider = ({ children }) => {
   return (
     <MessageContext.Provider value={{ useMessage, setMessage }}>
       <div className="fixed flex w-full justify-center bg-white shadow-sm z-50">
-        {message}
+        {Array.isArray(message) ? (
+          message.map((item) => (
+            <>
+              <br />
+              {item}
+            </>
+          ))
+        ) : (
+          <div>{message}</div>
+        )}
       </div>
       {children}
     </MessageContext.Provider>

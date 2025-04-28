@@ -19,6 +19,16 @@ const AppSideBar = ({ isCollapsed }: Props) => {
 
   const baseSidebarItems = [
     {
+      key: "4",
+      label: "ダッシュボード",
+      icon: <img width={25} height={25} src={boxImg} />,
+      onClick: () => {
+        const url = `${AppRoutes.serisListPage}?${queryParamKey.mediaSelected}=${master_media_cd}&${queryParamKey.tab}=0`;
+
+        navigate(url);
+      },
+    },
+    {
       key: "0",
       label: "商品管理",
       icon: <img width={25} height={25} src={boxImg} />,

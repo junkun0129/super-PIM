@@ -9,7 +9,8 @@ export const fetchRequest = async (
   url: string,
   method: "GET" | "POST",
   body?: any,
-  isauth: boolean = false
+  isauth: boolean = false,
+  isFormData: boolean = false // ← 追加！
 ) => {
   try {
     const token = getCookie(COOKIES.TOKEN);
@@ -22,12 +23,15 @@ export const fetchRequest = async (
       headers.append("Authorization", `Bearer ${token}`);
     }
 
-    headers.append("Content-Type", "application/json");
+    if (!isFormData) {
+      headers.append("Content-Type", "application/json");
+    }
+
     const urlWithBase = `${import.meta.env.VITE_BASE_URL}${url}`;
     const response = await fetch(urlWithBase, {
       method,
       headers,
-      body: JSON.stringify(body),
+      body: isFormData ? body : JSON.stringify(body),
     });
 
     if (response.status === 401) {
