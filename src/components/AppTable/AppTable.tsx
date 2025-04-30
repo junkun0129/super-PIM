@@ -1,6 +1,15 @@
-import React, { ReactNode, useCallback, useEffect, useState } from "react";
+import React, {
+  CSSProperties,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Column, TableProps } from "./type";
 import AppButton from "../AppButton/AppButton";
+import { layout } from "../../constant";
+import { moveBehindByKey } from "../../util";
 const paginatonOption = [10, 25, 50, 100];
 function AppTable<T extends Object>({
   key,
@@ -16,11 +25,18 @@ function AppTable<T extends Object>({
   draggableAccesor,
   onDrop,
   checkable = true,
+  isWithCustom = false,
+  isColumnResizable = false,
+  isColumnDraggable = false,
   selectedKeys: selectedKeysProps,
+  onColumnDrop,
   onSelectedKeysChange,
+  onWidthChange,
 }: TableProps<T>) {
   const [activeCd, setactiveCd] = useState<null | string>(null);
   const [overCd, setoverCd] = useState<null | string>(null);
+  const [activeColumnCd, setactiveColumnCd] = useState<null | string>(null);
+  const [overColumnCd, setoverColumnCd] = useState<null | string>(null);
   const [columns, setcolumns] = useState<Column<T>[]>([]);
   const [dataSource, setdataSource] = useState<T[]>([]);
   const [allChecked, setallChecked] = useState<{
@@ -30,6 +46,7 @@ function AppTable<T extends Object>({
     checked: false,
     apply: false,
   });
+  const [hoverColumnKey, sethoverColumnKey] = useState<string | null>(null);
   useEffect(() => {
     const newData = data;
     const newColumns = columnsProps;
@@ -41,6 +58,11 @@ function AppTable<T extends Object>({
     setdataSource(updatedData);
     setcolumns(updatedColumn);
   }, [data, columnsProps, checkable, selectedKeysProps]);
+
+  const draggingIndex = useRef<number | null>(null);
+  const startX = useRef<number>(0);
+  const startWidth = useRef<number>(0);
+  const widthChangedColumn = useRef<{ cd: string; width: number } | null>(null);
 
   useEffect(() => {
     if (!onSelectedKeysChange) return;
@@ -74,6 +96,7 @@ function AppTable<T extends Object>({
     if (checkable) {
       newColumns = [
         {
+          key: "check",
           accessor: "check" as keyof T,
           header: (
             <input
@@ -110,7 +133,7 @@ function AppTable<T extends Object>({
   const CheckInput = useCallback(
     ({ item }: { item: T }) => (
       <input
-        className="w-4 h-4 flex justify-center items-center"
+        className="w-4 h-4 flex justify-center items-center mt-1"
         type="checkbox"
         checked={selectedKeysProps.includes(item["cd"])}
         onClick={(e) => {
@@ -202,22 +225,136 @@ function AppTable<T extends Object>({
     event.preventDefault();
     setoverCd(newOverCd);
   };
+  const handleMouseDown = (e: React.MouseEvent, index: number) => {
+    draggingIndex.current = index;
+    startX.current = e.clientX;
+    startWidth.current = !!columns[index].width ? columns[index].width : 0;
 
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (draggingIndex.current === null) return;
+    const diff = e.clientX - startX.current;
+    const newWidth = Math.max(50, startWidth.current + diff);
+    widthChangedColumn.current = {
+      width: newWidth,
+      cd: columns[draggingIndex.current].key,
+    };
+    setcolumns((prev) => {
+      const updated = [...prev];
+      updated[draggingIndex.current!] = {
+        ...updated[draggingIndex.current!],
+        width: newWidth,
+      };
+      return updated;
+    });
+  };
+  const handleMouseUp = () => {
+    draggingIndex.current = null;
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
+    if (!widthChangedColumn.current) return;
+    const { cd, width } = widthChangedColumn.current;
+    onWidthChange(cd, width);
+    widthChangedColumn.current = null;
+  };
+  const handleColumnDragStart = (e: React.MouseEvent, key: string) => {
+    setactiveColumnCd(key);
+  };
+  const handleColumnDrop = (e: React.MouseEvent, key: string) => {
+    if (activeColumnCd && overColumnCd) {
+      const newColumns = moveBehindByKey(
+        columns,
+        activeColumnCd,
+        overColumnCd,
+        "key"
+      );
+      setcolumns(newColumns);
+      setactiveColumnCd(null);
+      setoverColumnCd(null);
+      onColumnDrop(activeColumnCd, overColumnCd);
+    }
+    setactiveColumnCd(null);
+    setoverColumnCd(null);
+  };
+  const handleColumnDragEnter = (e: React.MouseEvent) => {};
+  const handleColumnDragLeave = (e: React.MouseEvent) => {};
+  const handleColumnDragOver = (e: React.MouseEvent, key: string) => {
+    e.preventDefault();
+    setoverColumnCd(key);
+    if (!activeColumnCd) return;
+    const newColmns = moveBehindByKey(columns, activeColumnCd, key, "key");
+    setcolumns(newColmns);
+  };
+  const handleColumnDragEnd = (e: React.MouseEvent) => {};
   return (
-    <>
+    <div className=" overflow-x-auto">
       <table
         key={key}
-        className="shadow-md rounded-md w-full"
-        style={{ border: "solid 1px black" }}
+        className={`shadow-md`}
+        style={{
+          minWidth: isWithCustom ? "max-content" : "",
+          tableLayout: isWithCustom ? "fixed" : "auto",
+          width: isWithCustom ? "" : "100%",
+        }}
       >
         <thead>
           <tr>
             {columns.map((column, index) => (
               <th
-                className="px-3 py-2 border border-gray-400 bg-slate-500 text-white text-left font-normal"
+                className={`px-3 py-2 bg-slate-500  border border-gray-400 text-white text-left font-normal `}
                 key={index}
+                style={{
+                  backgroundColor:
+                    activeColumnCd === column.key ? "#c6d9e8" : "",
+                  width:
+                    column.accessor === "check"
+                      ? "41px"
+                      : isWithCustom
+                      ? column.width
+                      : "",
+                  height: "40px",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  display: isWithCustom ? "inline-block" : "",
+                  cursor: isColumnDraggable ? "grab" : "auto",
+                }}
+                draggable={isColumnDraggable}
+                onDragStart={(e) => handleColumnDragStart(e, column.key)}
+                onDrop={(e) => handleColumnDrop(e, column.key)}
+                onDragEnter={(e) => handleColumnDragEnter(e)}
+                onDragLeave={(e) => handleColumnDragLeave(e)}
+                onDragOver={(e) => handleColumnDragOver(e, column.key)}
+                onDragEnd={(e) => handleColumnDragEnd(e)}
+                onMouseEnter={() => sethoverColumnKey(column.key)}
+                onMouseLeave={() => sethoverColumnKey(null)}
               >
-                {column.header}
+                <div className="flex justify-between">
+                  {/* ラベル */}
+                  <div className="text-white">{column.header}</div>
+
+                  {/* リサイズハンドル */}
+                  {isColumnResizable && (
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex items-center justify-end w-[20px] relative"
+                    >
+                      {index < columns.length && (
+                        <div
+                          onMouseDown={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            handleMouseDown(e, index);
+                          }}
+                          className="h-full w-2 cursor-col-resize absolute -right-3"
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
               </th>
             ))}
           </tr>
@@ -241,17 +378,32 @@ function AppTable<T extends Object>({
                 }-tr hover:bg-gray-200 transition-shadow ${
                   activeCd === row["cd"] ? "shadow-lg scale-[1.01]" : ""
                 }`}
-                style={{ cursor: isDraggableRow ? "grab" : "default" }}
+                style={{
+                  cursor: isDraggableRow ? "grab" : "default",
+                }}
               >
                 {columns.map((column, colIndex) => {
                   const cellValue = row[column.accessor];
                   return (
                     <td
                       key={colIndex + rowIndex}
-                      className="px-3 py-2 border border-gray-400 "
-                      style={
-                        column.accessor === "check" ? { width: "0px" } : {}
-                      }
+                      className="px-3 py-2  border border-gray-400 border-t-0"
+                      style={{
+                        backgroundColor:
+                          activeColumnCd === column.key ? "#c6d9e8" : "",
+
+                        width:
+                          column.accessor === "check"
+                            ? "41px"
+                            : isWithCustom
+                            ? column.width
+                            : "",
+                        height: "40px",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        display: isWithCustom ? "inline-block" : "",
+                      }}
                       onClick={(e) => {
                         if (column.accessor !== "check") {
                           handleRowClick(row);
@@ -331,7 +483,7 @@ function AppTable<T extends Object>({
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

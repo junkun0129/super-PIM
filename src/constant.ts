@@ -30,8 +30,8 @@ export const URL = {
 export const layout = {
   header: 40,
   sidebar: {
-    expand: 150,
-    collapsed: 70,
+    expand: 190,
+    collapsed: 60,
   },
   setting: {
     header: 100,

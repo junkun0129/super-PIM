@@ -8,6 +8,14 @@ import { C_REQ_HEADER_SKU_LIST, PRODUCT_SAIYOUS } from "../../constant";
 import AppDropDownList from "../../components/AppDropDownList/AppDropDownList";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { AppRoutes, paramHolder, queryParamKey } from "../../routes";
+import { getProductListApi } from "../../api/product.api";
+import {
+  addHeaderApi,
+  getHeadersApi,
+  updateHeaderOrderApi,
+  updateWidthApi,
+} from "../../api/header.api";
+import SkuTableHeader from "./SkuTableHeader";
 type Row = {
   [key: string]: string;
 };
@@ -18,67 +26,104 @@ const SkuListPage = () => {
   const [dataSource, setdataSource] = useState<Row[]>([]);
   const [currentPage, setcurrentPage] = useState(1);
   const [pagination, setpagination] = useState(10);
-  const [order, setorder] = useState<"asc" | "desc">("asc");
-  const [isDeleted, setisDeleted] = useState<Flag>("0");
   const [total, settotal] = useState(0);
-  const { getHeadersApi, getSkuListApi } = skuApi;
+  const [selectedKeys, setselectedKeys] = useState<string[]>([]);
+  const [order, setorder] = useState<"asc" | "desc">("asc");
+  const [orderAttr, setorderAttr] = useState("pr_hinban");
+  const [isDeleted, setisDeleted] = useState<Flag>("0");
+  const [categoryKeys, setcategoryKeys] = useState<string[]>([]);
+  const [workspace, setworkspace] = useState("");
+  const [keywords, setkeywords] = useState("");
+
   const [options, setoptions] = useState<{ cd: string; label: string }[]>([]);
   const [seaerchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+
   useEffect(() => {
     updateSkuList();
-  }, []);
+  }, [
+    pagination,
+    currentPage,
+    keywords,
+    isDeleted,
+    order,
+    orderAttr,
+    categoryKeys,
+    workspace,
+  ]);
 
   const updateSkuList = async () => {
-    const offset = (currentPage - 1) * pagination;
-    const skuListRes = await getSkuListApi({
-      pagination,
-      offset,
-      order,
-      deleted: isDeleted,
-      series_cd: series_cd ?? "",
+    const productPromise = getProductListApi({
+      is: "0",
+      pg: currentPage,
+      ps: pagination,
+      ws: workspace,
+      ob: orderAttr,
+      or: order,
+      kw: keywords,
+      ct: categoryKeys.length ? categoryKeys[categoryKeys.length - 1] : "",
+      id: isDeleted,
     });
-    if (skuListRes.result !== "success") return;
-    const headerRes = await getHeadersApi();
-    if (headerRes.result !== "success") return;
-    const { data, total } = skuListRes;
-    const { addList, headers } = headerRes;
 
-    const newRows: Row[] = data.map((sku) => {
+    const headerPromise = getHeadersApi({
+      wks_cd: workspace,
+    });
+    const [productRes, headerRes] = await Promise.all([
+      productPromise,
+      headerPromise,
+    ]);
+    if (headerRes.result !== "success" || productRes.result !== "success")
+      return;
+
+    const { attrList, headers } = headerRes.data;
+    const { data: skuList, total } = productRes;
+
+    const newRows: Row[] = skuList.map((sku) => {
       const newRow: Row = {};
-      Object.entries(addList).map(([key, value]) => {
+      Object.entries(attrList).map(([key, value]) => {
         newRow[key] = "";
       });
 
-      const constRows = {
-        cd: sku.cd,
-        hinban: sku.hinban,
-        name: sku.name,
-        status:
-          sku.is_discontinued === "1"
-            ? "廃番"
-            : PRODUCT_SAIYOUS[sku.acpt_status],
-        pcl_name: sku.pcl_name,
-      };
-      const conbinedRow = { ...newRow, ...constRows };
-      if (sku.attrs.length) {
-        sku.attrs.map((attr) => {
-          conbinedRow[attr.cd] = attr.value;
+      if (sku.attrvalue.length) {
+        sku.attrvalue.map((attr) => {
+          conbinedRow[attr.atr_cd] = attr.atv_value;
         });
       }
+
+      const constRows = {
+        cd: sku.pr_cd,
+        hinban: sku.pr_hinban,
+        name: sku.pr_name,
+        status:
+          sku.pr_is_discontinued === "1"
+            ? "廃番"
+            : PRODUCT_SAIYOUS[sku.pr_acpt_status],
+        pcl_name: sku.pr_name,
+      };
+      const conbinedRow = { ...newRow, ...constRows };
+
       conbinedRow["action"] = "";
       return conbinedRow;
     });
 
-    const newColumn = headers.map((header) => {
+    const newColumn: {
+      key: string;
+      accessor: string;
+      header: string;
+      width?: number;
+    }[] = headers.map((header) => {
       return {
-        accessor: header.cd,
-        header: header.name,
+        accessor: header.hdr_cd,
+        header: attrList[header.attr_cd],
+        width: header.hdr_width,
+        key: header.hdr_cd,
       };
     });
     newColumn.push({
+      key: "add",
       accessor: "action",
       header: (<ColumnAddButton updateSkuList={updateSkuList} />) as any,
+      width: 40,
     });
 
     settotal(total);
@@ -93,8 +138,30 @@ const SkuListPage = () => {
     }
     navigate(url);
   };
+  const handleWidthChange = async (cd: string, width: number) => {
+    await updateWidthApi({
+      body: { hdr_cd: cd, hdr_width: width, wks_cd: "" },
+    });
+  };
+
+  const handleColumnDrop = async (active_cd: string, over_cd: string) => {
+    const res = await updateHeaderOrderApi({
+      body: {
+        active_cd,
+        over_cd,
+        wks_cd: "",
+      },
+    });
+  };
   return (
     <div>
+      <SkuTableHeader
+        updateList={() => {}}
+        selectedCategoryKeys={categoryKeys}
+        keyword={keywords}
+        setSelectedCategoryKeys={setcategoryKeys}
+        setKeyword={setkeywords}
+      />
       <AppTable
         key="sku"
         data={dataSource}
@@ -102,15 +169,16 @@ const SkuListPage = () => {
         onRowClick={handleRowClick}
         currentPage={currentPage}
         pagination={pagination}
-        selectedKeys={[]}
+        selectedKeys={selectedKeys}
         total={total}
+        isColumnResizable={true}
+        isColumnDraggable={true}
+        isWithCustom={true}
         onRowClickKey={"cd"}
-        onCurrentPageChange={function (page: number): void {
-          throw new Error("Function not implemented.");
-        }}
-        onPaginationChange={function (pagination: number): void {
-          throw new Error("Function not implemented.");
-        }}
+        onWidthChange={handleWidthChange}
+        onColumnDrop={handleColumnDrop}
+        onCurrentPageChange={(page) => setcurrentPage(page)}
+        onPaginationChange={(pagenation) => setpagination(pagenation)}
       />
     </div>
   );
@@ -124,33 +192,43 @@ type buttonProps = {
 const ColumnAddButton = ({ updateSkuList }: buttonProps) => {
   const [isOpen, setisOpen] = useState(false);
   const [options, setoptions] = useState<{ cd: string; label: string }[]>([]);
-  const { getHeadersApi, addHeaderApi } = skuApis;
+
   const handleAddColumn = async (cd: string) => {
-    const res = await addHeaderApi({ body: { attr_cd: cd } });
-    if (res.result !== "success") return;
+    const res = await addHeaderApi({ body: { atr_cd: cd, wks_cd: "" } });
+
     updateSkuList();
     setisOpen(false);
   };
 
   const handleClick = async () => {
-    const res = await getHeadersApi();
+    const res = await getHeadersApi({ wks_cd: "" });
     if (res.result !== "success") return;
-    const { addList, headers } = res;
-    const rowOptions = { ...addList, ...C_REQ_HEADER_SKU_LIST };
+    const { attrList, headers } = res.data;
+
+    const rowOptions = { ...attrList };
+
     headers.map((item) => {
-      delete rowOptions[item.cd];
+      delete rowOptions[item.attr_cd];
     });
     const newOptions = Object.entries(rowOptions).map(([key, value]) => ({
       cd: key,
       label: value,
     }));
+
     setoptions(newOptions);
     setisOpen(true);
   };
 
   return (
-    <AppDropDownList onSelect={handleAddColumn} open={isOpen} options={options}>
-      <button onClick={handleClick}>＋</button>
+    <AppDropDownList
+      onClose={() => setisOpen(false)}
+      onSelect={handleAddColumn}
+      open={isOpen}
+      options={options}
+    >
+      <button className="text-white" onClick={handleClick}>
+        ＋
+      </button>
     </AppDropDownList>
   );
 };

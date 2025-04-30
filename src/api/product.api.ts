@@ -14,7 +14,7 @@ type GetProductListReq = {
 };
 type GetProductListApiRes = {
   message: string;
-  result: Result;
+  result: string;
   data: {
     pr_cd: string;
     pr_name: string;
@@ -32,6 +32,10 @@ type GetProductListApiRes = {
     pcl: {
       pcl_name: string;
     };
+    attrvalue: {
+      atv_value: string;
+      atr_cd: string;
+    }[];
   }[];
   total: number;
 };

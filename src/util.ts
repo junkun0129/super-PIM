@@ -240,7 +240,6 @@ export function moveBehindByKey<T extends Record<string, any>>(
   targetKey: keyof T
 ): T[] | undefined {
   if (!arr.every((obj) => targetKey in obj)) return;
-
   const fromIndex = arr.findIndex((item) => item[targetKey] === activeKey);
   const toIndex = arr.findIndex((item) => item[targetKey] === overKey);
 

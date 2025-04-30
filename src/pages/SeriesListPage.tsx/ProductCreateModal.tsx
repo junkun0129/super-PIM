@@ -9,6 +9,7 @@ import { getPclAttrEntriesApi, GetPclEntriesApi } from "../../api/pcl.api";
 import { checkProductApi, createProductApi } from "../../api/product.api";
 import { runWithConcurrency } from "../../util";
 type Props = {
+  isSeries: boolean;
   open: boolean;
   onClose: () => void;
   updateList: () => void;
@@ -34,7 +35,7 @@ type CreateProductAttr = {
   default_value: string;
   is_common: string;
 };
-const SeriesCreateModal = ({ open, onClose, updateList }: Props) => {
+const ProductCreateModal = ({ open, onClose, updateList, isSeries }: Props) => {
   const [dropdownOpen, setdropdownOpen] = useState(false);
   const [dropdownOptions, setdropdownOptions] = useState<
     { cd: string; label: string }[]
@@ -176,7 +177,7 @@ const SeriesCreateModal = ({ open, onClose, updateList }: Props) => {
     const createPromises = seriesList.map((item) => () => {
       return createProductApi({
         body: {
-          is_series: "1",
+          is_series: !!isSeries ? "1" : "0",
           pr_name: item.series_name,
           pr_hinban: item.series_hinban,
           ctg_cd: "",
@@ -196,7 +197,11 @@ const SeriesCreateModal = ({ open, onClose, updateList }: Props) => {
     updateList();
   };
   return (
-    <AppModal title={"シリーズ作成"} open={open} onClose={onClose}>
+    <AppModal
+      title={isSeries ? "シリーズ作成" : "SKU作成"}
+      open={open}
+      onClose={onClose}
+    >
       <div className="flex h-[400px] ">
         {/* input form */}
         <form
@@ -226,7 +231,7 @@ const SeriesCreateModal = ({ open, onClose, updateList }: Props) => {
             {selectedPcl && (
               <>
                 <div className="w-full flex justify-between mt-2">
-                  <label className="p-1 w-1/2 font-bold">シリーズコード</label>
+                  <label className="p-1 w-1/2 font-bold">商品コード</label>
                   <input
                     className="w-1/2 border border-slate-500"
                     type="text"
@@ -234,7 +239,9 @@ const SeriesCreateModal = ({ open, onClose, updateList }: Props) => {
                   />
                 </div>
                 <div className="w-full flex justify-between mt-2">
-                  <label className="p-1 w-1/2 font-bold">シリーズ名</label>
+                  <label className="p-1 w-1/2 font-bold">
+                    {isSeries ? "シリーズ名" : "SKU名"}
+                  </label>
                   <input
                     className="w-1/2 border border-slate-500"
                     type="text"
@@ -341,4 +348,4 @@ const SeriesCreateModal = ({ open, onClose, updateList }: Props) => {
   );
 };
 
-export default SeriesCreateModal;
+export default ProductCreateModal;

@@ -5,18 +5,15 @@ import mediaApis from "../../api_dev/media.api";
 import { getObjectFromRowFormData } from "../../util";
 import { MediaTable } from "../../data/medias/medias";
 import SeriesListPage from "../../pages/SeriesListPage.tsx/SeriesListPage";
-import { master_media_cd } from "../../constant";
+import { layout, master_media_cd } from "../../constant";
 import boxImg from "../../assets/box.png";
 import exportImg from "../../assets/export.png";
 import importImg from "../../assets/import.png";
 import settingImg from "../../assets/setting.png";
 
-type Props = {
-  isCollapsed: boolean;
-};
-const AppSideBar = ({ isCollapsed }: Props) => {
+const AppSideBar = () => {
   const navigate = useNavigate();
-
+  const [isCollapsed, setisCollapsed] = useState(false);
   const baseSidebarItems = [
     {
       key: "4",
@@ -64,15 +61,23 @@ const AppSideBar = ({ isCollapsed }: Props) => {
       icon: <img width={25} height={25} src={settingImg} />,
       onClick: () => navigate(AppRoutes.settingPage),
     },
+    {
+      key: "6",
+      label: "",
+      icon: <div className="text-white">{">>"}</div>,
+      onClick: () => setisCollapsed((pre) => !pre),
+    },
   ];
-
+  const expand = layout.sidebar.expand.toString();
+  const collapsed = layout.sidebar.collapsed.toString();
   const [sidebarItems, setsidebarItems] = useState(baseSidebarItems);
   return (
     <div
-      style={{ height: "calc(100vh - 50px)" }}
-      className={`${
-        isCollapsed ? "w-[60px]" : "w-[170px]"
-      } bg-slate-600 shadow-2xl flex flex-col`}
+      style={{
+        height: `calc(100vh - ${layout.header}px)`,
+        width: isCollapsed ? `${collapsed}px` : `${expand}px`,
+      }}
+      className={`bg-slate-600 shadow-2xl flex flex-col`}
     >
       {sidebarItems.map((node) => (
         <button

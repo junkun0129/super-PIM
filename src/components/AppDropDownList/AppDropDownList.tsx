@@ -62,7 +62,7 @@ const AppDropDownList = ({
     }
   };
   return (
-    <div className={"relative " + className}>
+    <div className={"" + className}>
       {clonedChildren}
       {open && (
         <div

@@ -1,4 +1,4 @@
-import { CreatedSeriesEntry } from "../pages/SeriesListPage.tsx/SeriesCreateModal";
+import { CreatedSeriesEntry } from "../pages/SeriesListPage.tsx/ProductCreateModal";
 import { SAIYOUS_TO_ID } from "../constant";
 import { attributeData } from "../data/attributes/attributes.data";
 import { attrPclData } from "../data/attrpcls/attrpcls";

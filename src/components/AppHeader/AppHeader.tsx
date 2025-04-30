@@ -2,27 +2,40 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { AppRoutes } from "../../routes";
 import { layout } from "../../constant";
-type Props = {
-  isCollapesed: boolean;
-  setIsCollapesed: (isCollapsed: boolean) => void;
-};
-const AppHeader = ({ isCollapesed, setIsCollapesed }: Props) => {
+import logo from "../../assets/superpimlogo.png";
+import text from "../../assets/superpimtext.png";
+import AppButton from "../AppButton/AppButton";
+
+const AppHeader = () => {
   const navigate = useNavigate();
   const handleClick = () => {
     navigate(AppRoutes.seriesCreatePage);
   };
-  const width = isCollapesed ? layout.sidebar.collapsed : layout.sidebar.expand;
 
   return (
-    <div className="w-full h-[50px] bg-slate-600  relative">
-      <button
-        className={`absolute left-[${width}px] text-white text-lg p-1 px-2 rounded-md hover:bg-slate-700 top-2 h-[70%] `}
-        onClick={() => {
-          setIsCollapesed(!isCollapesed);
-        }}
-      >
-        {isCollapesed ? ">>" : "<<"}
-      </button>
+    <div className="w-full h-[50px] bg-slate-600  relative flex justify-end">
+      <div className="absolute flex left-4 top-[20%] items-center">
+        <img src={logo} width={30} height={30} />
+        <div className="font-bold text-white text-lg ml-2">SUPERPIM</div>
+      </div>
+      <div className="text-white">
+        <div>
+          <AppButton
+            text={""}
+            onClick={function (): void {
+              throw new Error("Function not implemented.");
+            }}
+            type={"normal"}
+          />
+          <AppButton
+            text={""}
+            onClick={function (): void {
+              throw new Error("Function not implemented.");
+            }}
+            type={"normal"}
+          />
+        </div>
+      </div>
     </div>
   );
 };

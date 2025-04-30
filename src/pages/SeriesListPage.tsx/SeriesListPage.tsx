@@ -22,12 +22,12 @@ type Row = {
   pcl_name: string;
 };
 export const columns: Column<Row>[] = [
-  { header: "商品コード", accessor: "hinban" },
-  { header: "シリーズ名", accessor: "name" },
-  { header: "ステータス", accessor: "status" },
-  { header: "商品分類", accessor: "pcl_name" },
-  { header: "作成日時", accessor: "created_at" },
-  { header: "更新日時", accessor: "updated_at" },
+  { header: "商品コード", accessor: "hinban", key: "hinban" },
+  { header: "シリーズ名", accessor: "name", key: "name" },
+  { header: "ステータス", accessor: "status", key: "status" },
+  { header: "商品分類", accessor: "pcl_name", key: "pcl_name" },
+  { header: "作成日時", accessor: "created_at", key: "created_at" },
+  { header: "更新日時", accessor: "updated_at", key: "updated_at" },
 ];
 
 const SeriesListPage = () => {

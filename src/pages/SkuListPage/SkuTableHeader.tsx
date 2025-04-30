@@ -3,22 +3,23 @@ import AppButton from "../../components/AppButton/AppButton";
 import AppModal from "../../components/AppModal/AppModal";
 
 import AppSearchBar from "../../components/AppSearchBar/AppSearchBar";
-import CategoryCascaderButton from "./CategoryCascaderButton";
-import ProductCreateModal from "./ProductCreateModal";
-type AppTableHeaderProps = {
+import CategoryCascaderButton from "../SeriesListPage.tsx/CategoryCascaderButton";
+import ProductCreateModal from "../SeriesListPage.tsx/ProductCreateModal";
+
+type SkuTableHeaderProps = {
   updateList: () => void;
   selectedCategoryKeys: string[];
   keyword: string;
   setSelectedCategoryKeys: (keys: string[]) => void;
   setKeyword: (e: string) => void;
 };
-const AppTableHeader = ({
+const SkuTableHeader = ({
   updateList,
   keyword,
   selectedCategoryKeys,
   setSelectedCategoryKeys,
   setKeyword,
-}: AppTableHeaderProps) => {
+}: SkuTableHeaderProps) => {
   const [isModalOpen, setisModalOpen] = useState<boolean>(false);
   return (
     <div className="w-full h-[50px] rounded-sm my-2 mb-6 bg-white shadow-md flex items-center p-3 justify-between">
@@ -53,13 +54,13 @@ const AppTableHeader = ({
       </div>
 
       <AppButton
-        text="＋新シリーズ作成"
+        text="＋ 新SKU作成"
         type="primary"
         onClick={() => setisModalOpen(true)}
       />
       <ProductCreateModal
         open={isModalOpen}
-        isSeries={true}
+        isSeries={false}
         onClose={() => setisModalOpen(false)}
         updateList={updateList}
       />
@@ -67,4 +68,4 @@ const AppTableHeader = ({
   );
 };
 
-export default AppTableHeader;
+export default SkuTableHeader;

@@ -18,7 +18,9 @@
 table,
 th,
 td {
-  border: 1px solid black;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .table-drag-hover {
