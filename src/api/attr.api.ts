@@ -121,3 +121,30 @@ export const deleteAttrApi = async ({
   const res = await fetchRequest(url, "POST", body);
   return res;
 };
+
+type GetAttrForPrFilterApiReq = {
+  selectedPclCd: string;
+  keyword: string;
+};
+
+export type FilterAttrList = {
+  atr_cd: string;
+  atr_name: string;
+  atr_control_type: string;
+  atr_max_length: number;
+  atr_select_list: string;
+};
+
+type GetAttrForPrFilterApiRes = {
+  data: FilterAttrList[];
+  result: string;
+  message: string;
+};
+export const getAttrForPrFilterApi = async ({
+  selectedPclCd,
+  keyword,
+}: GetAttrForPrFilterApiReq): Promise<GetAttrForPrFilterApiRes> => {
+  const url = `/atp/attr/filterlist?selectedPclCd=${selectedPclCd}&keyword=${keyword}`;
+  const res = await fetchRequest(url, "GET");
+  return res;
+};

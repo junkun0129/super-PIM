@@ -1,3 +1,4 @@
+import { operands } from "../constant";
 import { Result } from "../types/api.type";
 import { fetchRequest } from "./helper.api";
 
@@ -52,6 +53,33 @@ export const getProductListApi = async ({
 }: GetProductListReq): Promise<GetProductListApiRes> => {
   const url = `/product/list?pg=${pg}&ps=${ps}&or=${or}&kw=${kw}&is=${is}&ws=${ws}&ob=${ob}&ct=${ct}&id=${id}`;
   const res = await fetchRequest(url, "GET");
+  return res;
+};
+
+export type GetFilteredProductListReq = GetProductListReq & {
+  body: AttrFilter[];
+};
+
+export type AttrFilter = {
+  attr_cd: string;
+  operand: (typeof operands)[keyof typeof operands];
+  value: string;
+};
+
+export const getFiilteredProductListApi = async ({
+  is,
+  pg,
+  ps,
+  ws,
+  ob,
+  or,
+  kw,
+  ct,
+  id,
+  body,
+}: GetFilteredProductListReq): Promise<GetProductListApiRes> => {
+  const url = `/product/filteredlist?pg=${pg}&ps=${ps}&or=${or}&kw=${kw}&is=${is}&ws=${ws}&ob=${ob}&ct=${ct}&id=${id}`;
+  const res = await fetchRequest(url, "POST", body);
   return res;
 };
 

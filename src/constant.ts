@@ -119,6 +119,53 @@ const COMMON_PRODUCT_CLASSIFICATION = {
   name: "全分類共通",
 };
 
+export const operandsLabelForNumberAndDate = {
+  より大きい: "0",
+  より小さい: "1",
+  以上: "2",
+  以下: "3",
+  等しい: "4",
+  等しくない: "5",
+  含まれている: "6",
+  含まれていない: "7",
+  から始まる: "8",
+  で終わる: "9",
+};
+
+export const operandsLabelForComboAndRadio = {
+  等しい: "4",
+  等しくない: "5",
+  含まれている: "6",
+  含まれていない: "7",
+};
+
+export const operandsLabelForCheck = {
+  含まれている: "6",
+  含まれていない: "7",
+};
+
+export const operandsLabelForText = {
+  等しい: "4",
+  等しくない: "5",
+  含まれている: "6",
+  含まれていない: "7",
+  から始まる: "8",
+  で終わる: "9",
+};
+
+export const operands = {
+  greaterThan: "0",
+  lessThan: "1",
+  greaterThanOrEqual: "2",
+  lessThanOrEqual: "3",
+  equal: "4",
+  notEqual: "5",
+  contains: "6",
+  notContains: "7",
+  startsWith: "8",
+  endsWith: "9",
+};
+
 export const SERIES_ATTRIBUTE = {
   id: 999999,
   attribute: "PRD_SERIES",
