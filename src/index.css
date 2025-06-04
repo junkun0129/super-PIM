@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@font-face {
+  font-family: "notsan"; /* フォントファミリーの名前を指定 */
+  src: url("./assets/notsan.ttf") format("truetype"); /* フォントファイルへのパスを指定 */
+  /* 他のスタイル設定（オプション） */
+}
+* {
+  padding: 0%;
+  margin: 0%;
+  white-space: nowrap;
+  font-size: 16px;
+  font-family: "notsan";
+  color: rgb(56, 56, 56);
+}
+
+table,
+th,
+td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-drag-hover {
+  background-color: lightblue !important;
+}
