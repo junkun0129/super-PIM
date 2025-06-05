@@ -10,7 +10,11 @@ import { useMessageContext } from "../../providers/MessageContextProvider";
 import { PRODUCT_SAIYOUS } from "../../constant";
 import { AppRoutes, paramHolder, queryParamKey } from "../../routes";
 import AppTableHeader from "./AppTableHeader";
-import { getProductListApi } from "../../api/product.api";
+import {
+  AttrFilter,
+  getFiilteredProductListApi,
+  getProductListApi,
+} from "../../api/product.api";
 
 type Row = {
   cd: string;
@@ -37,6 +41,7 @@ const SeriesListPage = () => {
   const [categoryKeys, setcategoryKeys] = useState<string[]>([]);
   const [workspace, setworkspace] = useState("");
   const [keywords, setkeywords] = useState("");
+  const [selectedFilters, setSelectedFilters] = useState<AttrFilter[]>([]);
   const [orderAttr, setorderAttr] = useState("pr_hinban");
   const [order, setorder] = useState<"asc" | "desc">("asc");
   const [isDeleted, setisDeleted] = useState<Flag>("0");
@@ -52,7 +57,7 @@ const SeriesListPage = () => {
     return () => {
       setdata([]);
     };
-  }, [pagination, currentPage, keywords]);
+  }, [pagination, currentPage, keywords, selectedFilters, categoryKeys]);
 
   const handleRowClick = (series_cd: string) => {
     const media_cd = query.get(queryParamKey.mediaSelected);
@@ -67,17 +72,35 @@ const SeriesListPage = () => {
   };
 
   const getSeries = async () => {
-    const { data, total, result } = await getProductListApi({
-      is: "1",
-      pg: currentPage,
-      ps: pagination,
-      ws: workspace,
-      ob: orderAttr,
-      or: order,
-      kw: keywords,
-      ct: categoryKeys.length ? categoryKeys[categoryKeys.length - 1] : "",
-      id: isDeleted,
-    });
+    const { data, total, result } =
+      selectedFilters.length > 0
+        ? await getFiilteredProductListApi({
+            is: "1",
+            pg: currentPage,
+            ps: pagination,
+            ws: workspace,
+            ob: orderAttr,
+            or: order,
+            kw: keywords,
+            ct: categoryKeys.length
+              ? categoryKeys[categoryKeys.length - 1]
+              : "",
+            id: isDeleted,
+            body: selectedFilters,
+          })
+        : await getProductListApi({
+            is: "1",
+            pg: currentPage,
+            ps: pagination,
+            ws: workspace,
+            ob: orderAttr,
+            or: order,
+            kw: keywords,
+            ct: categoryKeys.length
+              ? categoryKeys[categoryKeys.length - 1]
+              : "",
+            id: isDeleted,
+          });
     if (result !== "success") return setMessage("リストの取得に失敗しました");
     const newDataSource: Row[] = data.map((pr, i) => ({
       cd: pr.pr_cd,
@@ -108,6 +131,8 @@ const SeriesListPage = () => {
         setSelectedCategoryKeys={setcategoryKeys}
         setKeyword={setkeywords}
         keyword={keywords}
+        selectedFilters={selectedFilters}
+        setSelectedFilters={setSelectedFilters}
       />
 
       {data && (

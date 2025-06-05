@@ -6,10 +6,14 @@ import AppSearchBar from "../../components/AppSearchBar/AppSearchBar";
 import CategoryCascaderButton from "./CategoryCascaderButton";
 import ProductCreateModal from "./ProductCreateModal";
 import AttrFilterButton from "./AttrFilterButton";
+import { AttrFilter } from "../../api/product.api";
 type AppTableHeaderProps = {
   updateList: () => void;
   selectedCategoryKeys: string[];
   keyword: string;
+  selectedFilters: AttrFilter[];
+  setSelectedFilters: (filters: AttrFilter[]) => void;
+
   setSelectedCategoryKeys: (keys: string[]) => void;
   setKeyword: (e: string) => void;
   isSeries?: boolean;
@@ -20,13 +24,16 @@ type AppTableHeaderProps = {
 const AppTableHeader = ({
   updateList,
   keyword,
+  setKeyword,
   selectedCategoryKeys,
   setSelectedCategoryKeys,
-  setKeyword,
+  selectedFilters,
+  setSelectedFilters,
   isSeries = false,
   selectedCd,
 }: AppTableHeaderProps) => {
   const [isModalOpen, setisModalOpen] = useState<boolean>(false);
+
   return (
     <div className="w-full h-[50px] rounded-sm my-2 mb-6 bg-white shadow-md flex items-center p-3 justify-between">
       <div className="flex items-center">
@@ -34,7 +41,11 @@ const AppTableHeader = ({
           onSearchClick={(e) => setKeyword(e.target.value)}
           placeHolder="キーワード検索"
         />
-        <AttrFilterButton selectedPclCd={""} />
+        <AttrFilterButton
+          selectedPclCd={""}
+          selectedFilters={selectedFilters}
+          setSelectedFilters={setSelectedFilters}
+        />
         <CategoryCascaderButton
           selectedKeys={selectedCategoryKeys}
           setSelectedKeys={setSelectedCategoryKeys}

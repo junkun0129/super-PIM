@@ -14,10 +14,15 @@ import {
 } from "../../constant";
 type Props = {
   selectedPclCd: string;
+  selectedFilters: AttrFilter[];
+  setSelectedFilters: (filters: AttrFilter[]) => void;
 };
-const AttrFilterButton = ({ selectedPclCd }: Props) => {
+const AttrFilterButton = ({
+  selectedPclCd,
+  selectedFilters,
+  setSelectedFilters,
+}: Props) => {
   const [openpopup, setopenpopup] = useState(false);
-  const [filtered, setfiltered] = useState<AttrFilter[]>([]);
   const [filterAttrsList, setfilterAttrsList] = useState<FilterAttrList[]>([]);
   const [keyword, setkeyword] = useState<string>("");
 
@@ -39,9 +44,9 @@ const AttrFilterButton = ({ selectedPclCd }: Props) => {
         onClose={() => setopenpopup(false)}
         content={
           <FilterList
-            selectedFilters={filtered}
+            selectedFilters={selectedFilters}
             filterList={filterAttrsList}
-            setSelectedFilters={(selecteds) => setfiltered((pre) => selecteds)}
+            setSelectedFilters={(filters) => setSelectedFilters(filters)}
           />
         }
       >
@@ -68,12 +73,12 @@ const FilterList = ({
   filterList,
   setSelectedFilters,
 }: FilterListProps) => (
-  <ul>
+  <ul className=" overflow-auto h-[200px] pr-2">
     {filterList.map((item, i) => {
       const selectedFilter = selectedFilters.find(
         (selected) => selected.attr_cd === item.atr_cd
       );
-      let operandsOption: any = { [""]: "" };
+      let operandsOption: Object = { any: "" };
 
       switch (item.atr_control_type) {
         case INPUT_TYPES.SINGLE_LINE || INPUT_TYPES.MULTI_LINE:
@@ -93,10 +98,7 @@ const FilterList = ({
           break;
       }
       return (
-        <li
-          key={`${i}-attrfilterlist`}
-          className="flex py-1 my-2 justify-between"
-        >
+        <li key={`${i}-attrfilterlist`} className="flex py-1 mb-2 h-[45px]">
           <input
             key={`filterattrcheck-${item.atr_cd}`}
             type="checkbox"
@@ -119,9 +121,12 @@ const FilterList = ({
               }
             }}
           />
-          <label>{item.atr_name}</label>
+          <label className=" min-w-[100px] max-w-[350px] flex items-center ml-3">
+            {item.atr_name}
+          </label>
           {!!selectedFilter && (
             <select
+              className="border border-gray-500 rounded-sm p-1"
               value={selectedFilter.operand}
               onChange={(e) => {
                 const newSelectedFilters = selectedFilters.map((selected) => {
@@ -144,6 +149,7 @@ const FilterList = ({
             selectedFilter.operand !== operands.contains &&
             selectedFilter.operand !== operands.notContains && (
               <input
+                className="border border-gray-500 rounded-sm p-1 ml-3"
                 type={
                   selectedFilter.operand === operands.lessThan ||
                   selectedFilter.operand === operands.greaterThan ||
