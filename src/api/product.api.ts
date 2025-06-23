@@ -30,6 +30,9 @@ type GetProductListApiRes = {
     pr_is_series: string;
     pr_series_cd: string;
     pr_description: string;
+    asset: {
+      ast_ext: string;
+    }[];
     pcl: {
       pcl_name: string;
     };
@@ -38,6 +41,7 @@ type GetProductListApiRes = {
       atr_cd: string;
     }[];
   }[];
+  mainAssetBoxKey: string;
   total: number;
 };
 export const getProductListApi = async ({
@@ -239,6 +243,23 @@ export const updateProductCategoryApi = async ({
   body,
 }: UpdateProductCategoryApiReq): Promise<UpdateProductCategoryApiRes> => {
   const url = `/product/update/category`;
+  const res = await fetchRequest(url, "POST", body);
+  return res;
+};
+
+type DeleteProductApiReq = {
+  body: { cd: string };
+};
+
+export type DeleteProductApiRes = {
+  message: string;
+  result: string;
+};
+
+export const DeleteProductApi = async ({
+  body,
+}: DeleteProductApiReq): Promise<DeleteProductApiRes> => {
+  const url = `/product/delete`;
   const res = await fetchRequest(url, "POST", body);
   return res;
 };

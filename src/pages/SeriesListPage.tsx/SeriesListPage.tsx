@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { ReactNode, useContext, useEffect, useState } from "react";
 import AppTable from "../../components/AppTable/AppTable";
 import { Column } from "../../components/AppTable/type";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -18,6 +18,7 @@ import {
 
 type Row = {
   cd: string;
+  img: ReactNode;
   hinban: string;
   name: string;
   status: string;
@@ -27,6 +28,7 @@ type Row = {
 };
 export const columns: Column<Row>[] = [
   { header: "商品コード", accessor: "hinban", key: "hinban" },
+  { header: "画像", accessor: "img", key: "img" },
   { header: "シリーズ名", accessor: "name", key: "name" },
   { header: "ステータス", accessor: "status", key: "status" },
   { header: "商品分類", accessor: "pcl_name", key: "pcl_name" },
@@ -72,7 +74,7 @@ const SeriesListPage = () => {
   };
 
   const getSeries = async () => {
-    const { data, total, result } =
+    const { data, total, result, mainAssetBoxKey } =
       selectedFilters.length > 0
         ? await getFiilteredProductListApi({
             is: "1",
@@ -102,18 +104,26 @@ const SeriesListPage = () => {
             id: isDeleted,
           });
     if (result !== "success") return setMessage("リストの取得に失敗しました");
-    const newDataSource: Row[] = data.map((pr, i) => ({
-      cd: pr.pr_cd,
-      hinban: pr.pr_hinban,
-      name: pr.pr_name,
-      pcl_name: pr.pcl.pcl_name,
-      created_at: isoToDateText(pr.pr_created_at),
-      updated_at: isoToDateText(pr.pr_updated_at),
-      status:
-        pr.pr_is_discontinued === "1"
-          ? "廃番"
-          : PRODUCT_SAIYOUS[pr.pr_acpt_status],
-    }));
+    const newDataSource: Row[] = data.map((pr, i) => {
+      const imgPath = pr.asset.length
+        ? `${import.meta.env.VITE_BASE_URL}/${mainAssetBoxKey}/${pr.pr_cd}.${
+            pr.asset[0].ast_ext
+          }`
+        : "";
+      return {
+        cd: pr.pr_cd,
+        img: <img src={imgPath} />,
+        hinban: pr.pr_hinban,
+        name: pr.pr_name,
+        pcl_name: pr.pcl.pcl_name,
+        created_at: isoToDateText(pr.pr_created_at),
+        updated_at: isoToDateText(pr.pr_updated_at),
+        status:
+          pr.pr_is_discontinued === "1"
+            ? "廃番"
+            : PRODUCT_SAIYOUS[pr.pr_acpt_status],
+      };
+    });
     setTotal(total);
     setdata(newDataSource);
   };
@@ -133,6 +143,9 @@ const SeriesListPage = () => {
         keyword={keywords}
         selectedFilters={selectedFilters}
         setSelectedFilters={setSelectedFilters}
+        selectedKeys={selectedKeys}
+        setSelectedKeys={setselectedKeys}
+        isSeries={true}
       />
 
       {data && (

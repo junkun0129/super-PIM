@@ -160,9 +160,15 @@ const ProductCreateModal = ({ open, onClose, updateList, isSeries }: Props) => {
     const doubledNames = list.filter((item) => item.series_name === name);
     const doubeldCds = list.filter((item) => item.series_hinban === cd);
     if (!!doubledNames.length)
-      return { result: "failed", message: "シリーズ名が既に存在します" };
+      return {
+        result: "failed",
+        message: `${isSeries ? "シリーズ名" : "SKU名"}が既に存在します`,
+      };
     if (!!doubeldCds.length)
-      return { result: "failed", message: "シリーズコードが既に存在します" };
+      return {
+        result: "failed",
+        message: `${isSeries ? "シリーズコード" : "SKUコード"}が既に存在します`,
+      };
     return { result: "success" };
   };
 
@@ -191,7 +197,7 @@ const ProductCreateModal = ({ open, onClose, updateList, isSeries }: Props) => {
     });
     const res = await runWithConcurrency(createPromises, 10);
     if (res.some((item) => item.result === "failed")) return;
-    setMessage("シリーズが作成されました。");
+    setMessage(`${isSeries ? "シリーズ" : "SKU"}が作成されました。`);
     setseriesList([]);
     onClose();
     updateList();

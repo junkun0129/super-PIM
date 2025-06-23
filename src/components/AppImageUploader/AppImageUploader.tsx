@@ -13,6 +13,7 @@ const AppImageUploader = ({
 }: Props) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
+  const [hover, sethover] = useState(false);
   const [imageSrc, setImageSrc] = useState(imagePath); // 初期の画像URLを保持する状態
 
   const handleClick = () => {
@@ -62,6 +63,15 @@ const AppImageUploader = ({
     const fileExt = "." + file.name.split(".").pop()?.toLowerCase();
     return acceptExtensions.includes(fileExt); // 拡張子が許可されたものか確認
   };
+  const handleMouseOver = (e: React.MouseEvent) => {
+    e.preventDefault();
+    sethover(true);
+  };
+
+  const handleMouseLeave = (e: React.MouseEvent) => {
+    e.preventDefault();
+    sethover(false);
+  };
   useEffect(() => {
     console.log(imagePath);
     setImageSrc(imagePath);
@@ -71,16 +81,39 @@ const AppImageUploader = ({
     <div
       onClick={handleClick}
       onDragOver={handleDragOver}
+      onMouseOver={handleMouseOver}
+      onMouseLeave={handleMouseLeave}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      className="w-full h-full relative"
       style={{
-        border: "2px dashed gray",
+        border: "1px solid gray",
         padding: "20px",
         textAlign: "center",
         backgroundColor: dragging ? "#f0f8ff" : "#fff",
         cursor: "pointer",
       }}
     >
+      {hover && (
+        <div className="absolute w-full h-full top-0 left-0 flex justify-center items-center ">
+          <div className="relative w-full h-full">
+            <div className="w-full h-full absolute bg-black opacity-70"></div>
+            <div className="w-full h-full absolute flex justify-center items-center text-white">
+              クリックして画像を挿入
+            </div>
+          </div>
+        </div>
+      )}
+      {dragging && (
+        <div className="absolute w-full h-full top-0 left-0 flex justify-center items-center ">
+          <div className="relative w-full h-full">
+            <div className="w-full h-full absolute bg-black opacity-70"></div>
+            <div className="w-full h-full absolute flex justify-center items-center text-white">
+              ここにドラッグしてください
+            </div>
+          </div>
+        </div>
+      )}
       <input
         type="file"
         ref={inputRef}
@@ -96,15 +129,13 @@ const AppImageUploader = ({
           // 画像の読み込み失敗時に代替画像を表示
           const target = e.currentTarget;
           target.onerror = null;
-          target.src = "http://localhost:3000/nocontent.png"; // エラーフォールバック
+          target.src = "http://localhost:3000/nocontent.png";
         }}
-        style={{ maxWidth: "100%", maxHeight: "200px" }} // 最大幅200pxに制限
+        width={"100%"}
+        className="w-full h-full"
+        height={"100%"}
+        style={{ objectFit: "contain" }}
       />
-      <p>
-        {dragging
-          ? "ここにファイルをドロップ"
-          : "クリックまたはドラッグ＆ドロップでファイルを選択"}
-      </p>
     </div>
   );
 };

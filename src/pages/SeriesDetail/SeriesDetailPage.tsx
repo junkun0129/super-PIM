@@ -31,7 +31,7 @@ import { CategoryTree, getCategoryListApi } from "../../api/category.api";
 import { GetPclEntriesApi } from "../../api/pcl.api";
 import AppImageUploader from "../../components/AppImageUploader/AppImageUploader";
 import { uploadAssetApi } from "../../api/asset.api";
-import { ASSET_TABS } from "../../constant";
+import { ASSET_TABS, layout } from "../../constant";
 const initialSeries = {
   pr_cd: "",
   pcl: {
@@ -260,20 +260,25 @@ const SeriesDetailPage = () => {
   };
 
   return (
-    <div className="w-full h-full">
-      <div className="mb-3 text-2xl font-bold">シリーズ詳細画面</div>
-
-      <div className="flex h-[95%]">
-        <div className="rounded-md bg-white shadow-md  relative  h-full flex flex-col px-6 ">
-          {series && (
-            <div className="w-full h-full flex flex-col py-3 overflow-auto">
-              <div className="w-full flex">
+    <div
+      className="w-full overflow-hidden"
+      style={{ height: `calc(100vh - ${layout.header}px)` }}
+    >
+      {/* 左側部分 */}
+      <div className="flex h-[90%]">
+        <div className="rounded-md bg-white shadow-md flex flex-col">
+          <div className="relative  h- flex flex-col px-6 overflow-y-auto overflow-x-hidden">
+            <div className="w-full h-full flex flex-col py-3">
+              {/* 商品画像 */}
+              <div className="w-full h-[150px] flex justify-center mt-3">
                 <AppImageUploader
                   onFileSelect={handleImgUpload}
                   imagePath={`http://localhost:3000/${imgUrl}?d=${Math.random()}`}
                   acceptExtensions={[".jpg", ".png", ".pdf"]}
                 />
               </div>
+
+              {/* タイトル */}
               <div>
                 <div className="font-bold  mb-1 mt-4">シリーズ名</div>
                 <input
@@ -289,6 +294,7 @@ const SeriesDetailPage = () => {
                 />
               </div>
 
+              {/* 説明 */}
               <div>
                 <div className="font-bold  mb-1 mt-4">説明</div>
                 <textarea
@@ -303,6 +309,8 @@ const SeriesDetailPage = () => {
                   }}
                 />
               </div>
+
+              {/* 商品分類 */}
               <div>
                 <div className="font-bold mb-1 mt-4">商品分類</div>
                 <AppDropDownList
@@ -319,6 +327,7 @@ const SeriesDetailPage = () => {
                 </AppDropDownList>
               </div>
 
+              {/* カテゴリ */}
               <div>
                 <div className="font-bold mb-1 mt-4">カテゴリ</div>
                 <AppCategoryCascader
@@ -345,17 +354,19 @@ const SeriesDetailPage = () => {
                   </div>
                 </AppCategoryCascader>
               </div>
-              <div className="absolute right-5 bottom-5 mt-10">
-                <AppButton
-                  text="保存"
-                  type="primary"
-                  isForm={true}
-                  onClick={() => handleSubmit()}
-                ></AppButton>
-              </div>
             </div>
-          )}
+          </div>
+          {/* 保存ボタン */}
+          <div className="w-full flex justify-end px-3 py-3">
+            <AppButton
+              text="保存"
+              type="primary"
+              isForm={true}
+              onClick={() => handleSubmit()}
+            ></AppButton>
+          </div>
         </div>
+        {/* 右側部分 */}
         <div className="-pt-5 ml-5 w-full rounded-md shadow-lg bg-white">
           <AppTab
             activeId={activeTabKey}
