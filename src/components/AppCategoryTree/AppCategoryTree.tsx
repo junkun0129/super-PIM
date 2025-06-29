@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
-import categoryApis from "../../api_dev/category.api";
 import { useMessageContext } from "../../providers/MessageContextProvider";
 import { getObjectFromRowFormData } from "../../util";
 import AppSortable from "../AppSortable/AppSortable";
@@ -24,7 +23,6 @@ const AppCategoryTree = ({ node, updateCategoryTree, updateOrder }: Props) => {
   const [isOpen, setisOpen] = useState(false);
   const [isAdd, setisAdd] = useState(false);
   const [isMouseOver, setisMouseOver] = useState(false);
-  const { updateCategoryOrderApi, createCaetgoryApi } = categoryApis;
   const hasChildren = !!node.children?.length;
   const { setMessage } = useMessageContext();
   const [nameInput, setnameInput] = useState("");

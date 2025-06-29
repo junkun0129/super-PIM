@@ -10,8 +10,8 @@ export const AppRoutes = {
   seriesDetailPage: `/seriesdetail/${paramHolder.series_cd}`,
   seriesCreatePage: "/seriescreate",
   pclMainPage: "/pcl",
-  pclDetailPage: `/pcl/detail/${paramHolder.pcl_cd}`,
-  skuDetailPage: `/sku/detail/${paramHolder.sku_cd}`,
+  pclDetailPage: `/pcldetail/${paramHolder.pcl_cd}`,
+  skuDetailPage: `/skudetail/${paramHolder.sku_cd}`,
   settingPage: "/setting",
 };
 

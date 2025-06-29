@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import AppCategoryTree from "../../../components/AppCategoryTree/AppCategoryTree";
 import { categoriesData } from "../../../data/categories/categories.data";
 import { CategoryNode } from "../../../data/categories/type";
-import categoryApis from "../../../api_dev/category.api";
+
 import AppSortable from "../../../components/AppSortable/AppSortable";
 import { useMessageContext } from "../../../providers/MessageContextProvider";
 import AppButton from "../../../components/AppButton/AppButton";
@@ -16,7 +16,7 @@ import {
 
 const CategoryManage = () => {
   const [categories, setcategories] = useState<CategoryTree[]>([]);
-  const { getAllCategoriesApi, updateCategoryOrderApi } = categoryApis;
+
   const [isFirstInputOn, setisFirstInputOn] = useState<boolean>(false);
   const [isRootInputOpen, setisRootInputOpen] = useState<boolean>(false);
   const [rootCreateInput, setrootCreateInput] = useState<string>("");
@@ -39,19 +39,7 @@ const CategoryManage = () => {
     activeCd: string;
     overCd: string;
     parent_cd: string;
-  }) => {
-    console.log(parent_cd, overCd, activeCd);
-    const res = await updateCategoryOrderApi({
-      body: {
-        active_cd: activeCd,
-        over_cd: overCd,
-        parent_cd,
-      },
-    });
-    if (res.result !== "success") return;
-    getCategories();
-    setMessage("カテゴリの順番が更新されました");
-  };
+  }) => {};
 
   const handleBlur = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.value) return setisFirstInputOn(false);

@@ -27,6 +27,12 @@ export const URL = {
   MAIN: "/main",
 };
 
+export const ATTR_DISPLAY_MODE = {
+  COMMON: "1",
+  UNIQUE: "0",
+  BOTH: "2",
+};
+
 export const layout = {
   header: 40,
   sidebar: {

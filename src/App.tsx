@@ -2,7 +2,6 @@ import { Column } from "./components/AppTable/type";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AppLayout from "./components/AppLayout/AppLayout";
 import { AppRoutes } from "./routes";
-import SeriesCreatePage from "./pages/SeriesCreatePage/SeriesCreatePage";
 import SkuDetailPage from "./pages/SkuDetailPage/SkuDetailPage";
 import MainPage from "./pages/MainPage/MainPage";
 import { MessageContextProvider } from "./providers/MessageContextProvider";
@@ -27,14 +26,10 @@ function App() {
                 path={AppRoutes.seriesDetailPage}
                 element={<SeriesDetailPage />}
               />
-              <Route
-                path={AppRoutes.seriesCreatePage}
-                element={<SeriesCreatePage />}
-              />
 
               <Route
                 path={AppRoutes.skuDetailPage}
-                element={<SkuDetailPage />}
+                element={<SeriesDetailPage />}
               />
               <Route path={AppRoutes.settingPage} element={<SettingPage />} />
             </Route>

@@ -8,9 +8,11 @@ import { useMessageContext } from "../../providers/MessageContextProvider";
 import { getPclAttrEntriesApi, GetPclEntriesApi } from "../../api/pcl.api";
 import { checkProductApi, createProductApi } from "../../api/product.api";
 import { runWithConcurrency } from "../../util";
+import { useParams } from "react-router-dom";
 type Props = {
   isSeries: boolean;
   open: boolean;
+  selectedPclCd?: string;
   onClose: () => void;
   updateList: () => void;
 };
@@ -35,12 +37,18 @@ type CreateProductAttr = {
   default_value: string;
   is_common: string;
 };
-const ProductCreateModal = ({ open, onClose, updateList, isSeries }: Props) => {
+const ProductCreateModal = ({
+  open,
+  onClose,
+  updateList,
+  isSeries,
+  selectedPclCd,
+}: Props) => {
   const [dropdownOpen, setdropdownOpen] = useState(false);
   const [dropdownOptions, setdropdownOptions] = useState<
     { cd: string; label: string }[]
   >([]);
-
+  let { series_cd } = useParams();
   const { setMessage } = useMessageContext();
   const [selectedPcl, setselectedPcl] = useState<{
     cd: string;
@@ -50,9 +58,14 @@ const ProductCreateModal = ({ open, onClose, updateList, isSeries }: Props) => {
   const [seriesList, setseriesList] = useState<CreatedSeriesEntry[]>([]);
 
   useEffect(() => {
-    if (!selectedPcl) return;
+    if (!selectedPcl || !!selectedPclCd) return;
     getAttrList(selectedPcl.cd);
   }, [selectedPcl]);
+
+  useEffect(() => {
+    if (!selectedPclCd) return;
+    getAttrList(selectedPclCd);
+  }, [selectedPclCd]);
 
   useEffect(() => {
     if (!open) {
@@ -68,7 +81,7 @@ const ProductCreateModal = ({ open, onClose, updateList, isSeries }: Props) => {
     if (res.result !== "success") return;
     setattrList(
       res.data
-        .filter((item) => item.atp_is_common === "1")
+        .filter((item) => item.atp_is_common === (!!selectedPclCd ? "0" : "1"))
         .map((item) => ({
           cd: item.attr.atr_cd,
           is_common: item.atp_is_common,
@@ -127,8 +140,8 @@ const ProductCreateModal = ({ open, onClose, updateList, isSeries }: Props) => {
 
     if (res.result !== "success") return setMessage(res.message);
     const newSeriesEntry: CreatedSeriesEntry = {
-      pcl_cd: selectedPcl.cd,
-      pcl_name: selectedPcl.label,
+      pcl_cd: selectedPclCd ? "" : selectedPcl ? selectedPcl.cd : "",
+      pcl_name: selectedPclCd ? "" : selectedPcl ? selectedPcl.label : "",
       series_hinban,
       series_name,
       attrs: attrList.map((attr, i) => {
@@ -186,8 +199,9 @@ const ProductCreateModal = ({ open, onClose, updateList, isSeries }: Props) => {
           is_series: !!isSeries ? "1" : "0",
           pr_name: item.series_name,
           pr_hinban: item.series_hinban,
+          pr_series_cd: series_cd ?? "",
           ctg_cd: "",
-          pcl_cd: item.pcl_cd,
+          pcl_cd: selectedPclCd ?? item.pcl_cd,
           attrvalues: item.attrs.map((attr) => ({
             atr_cd: attr.cd,
             atv_value: attr.value,
@@ -215,26 +229,29 @@ const ProductCreateModal = ({ open, onClose, updateList, isSeries }: Props) => {
           onSubmit={(e) => handleAddToSeriesList(e, seriesList)}
         >
           <div className=" w-[400px]  mx-5 overflow-auto h-full">
-            <div className="flex justify-between w-full">
-              <div className="p-1 font-bold w-1/2 ">属性セット</div>
-              <AppDropDownList
-                className="w-1/2"
-                open={dropdownOpen}
-                onClose={() => setdropdownOpen(false)}
-                onSelect={handleSelectPcl}
-                options={dropdownOptions}
-              >
-                <button
-                  className="w-full border border-slate-500 rounded-sm p-1 px-2 flex justify-between"
-                  onClick={(e) => handleClick(e)}
+            {!selectedPclCd && (
+              <div className="flex justify-between w-full">
+                <div className="p-1 font-bold w-1/2 ">属性セット</div>
+                <AppDropDownList
+                  className="w-1/2"
+                  open={dropdownOpen}
+                  onClose={() => setdropdownOpen(false)}
+                  onSelect={handleSelectPcl}
+                  options={dropdownOptions}
                 >
-                  <div>{selectedPcl && selectedPcl.label}</div>
-                  <div className=" rotate-90 bg-white">＞</div>
-                </button>
-              </AppDropDownList>
-            </div>
+                  <button
+                    className="w-full border border-slate-500 rounded-sm p-1 px-2 flex justify-between"
+                    onClick={(e) => handleClick(e)}
+                  >
+                    <div>{selectedPcl && selectedPcl.label}</div>
+                    <div className=" rotate-90 bg-white">＞</div>
+                  </button>
+                </AppDropDownList>
+              </div>
+            )}
 
-            {selectedPcl && (
+            {((!selectedPcl && !!selectedPclCd) ||
+              (!!selectedPcl && !selectedPclCd)) && (
               <>
                 <div className="w-full flex justify-between mt-2">
                   <label className="p-1 w-1/2 font-bold">商品コード</label>
@@ -290,7 +307,12 @@ const ProductCreateModal = ({ open, onClose, updateList, isSeries }: Props) => {
             type="primary"
             className="w-[100%] mt-5"
             isForm={true}
-            disabled={!selectedPcl}
+            disabled={
+              !(
+                (!selectedPcl && !!selectedPclCd) ||
+                (!!selectedPcl && !selectedPclCd)
+              )
+            }
             onClick={() => console.log("object")}
           ></AppButton>
         </form>
@@ -329,11 +351,15 @@ const ProductCreateModal = ({ open, onClose, updateList, isSeries }: Props) => {
                   <div>{series.series_hinban}</div>
                 </div>
                 <div className="border-b border-gray-300 my-1"></div>
-                <div className="flex w-full">
-                  <div className="w-1/2 font-bold">属性セット</div>
-                  <div>{series.pcl_name}</div>
-                </div>
-                <div className="border-b border-gray-300 my-1"></div>
+                {!selectedPclCd && (
+                  <>
+                    <div className="flex w-full">
+                      <div className="w-1/2 font-bold">属性セット</div>
+                      <div>{series.pcl_name}</div>
+                    </div>
+                    <div className="border-b border-gray-300 my-1"></div>
+                  </>
+                )}
                 {series.attrs.map((attr, i) => (
                   <>
                     <div key={i} className="flex w-full">

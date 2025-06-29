@@ -148,3 +148,68 @@ export const getAttrForPrFilterApi = async ({
   const res = await fetchRequest(url, "GET");
   return res;
 };
+
+type GetProductAttrListApiReq = {
+  pr_cd: string;
+  pcl_cd: string;
+  display_mode: string;
+  series_cd: string;
+};
+
+type GetProductAttrListApiRes = {
+  data: ProductAttr[];
+  result: string;
+  message: string;
+};
+
+export type ProductAttr = {
+  pcl_cd: string;
+  atp_order: number;
+  atp_is_show: string;
+  atp_alter_name: string;
+  atp_is_common: string;
+  value?: string;
+  attr: {
+    atr_cd: string;
+    atr_not_null: string;
+    atr_max_length: number;
+    atr_unit: string;
+    atr_is_with_unit: string;
+    atr_control_type: string;
+    atr_name: string;
+    atr_select_list: string;
+  };
+};
+
+export const getProductAttrListApi = async ({
+  pr_cd,
+  pcl_cd,
+  display_mode,
+  series_cd,
+}: GetProductAttrListApiReq): Promise<GetProductAttrListApiRes> => {
+  const url = `/atp/atrpr/list?pn=${pr_cd}&pc=${pcl_cd}&cs=${display_mode}&ps=${series_cd}`;
+  const res = await fetchRequest(url, "GET");
+  return res;
+};
+
+type UpdateProductAttrsReq = {
+  body: {
+    pr_cd: string;
+    attrs: {
+      atr_cd: string;
+      value: string;
+    }[];
+  };
+};
+type UpdateProductAttrsRes = {
+  result: string;
+  message: string;
+};
+
+export const updateProductAttrsApi = async ({
+  body,
+}: UpdateProductAttrsReq): Promise<UpdateProductAttrsRes> => {
+  const url = `/atp/atrpr/update`;
+  const res = await fetchRequest(url, "POST", body);
+  return res;
+};

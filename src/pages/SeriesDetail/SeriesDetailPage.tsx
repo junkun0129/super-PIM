@@ -1,27 +1,27 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { AppTabProps } from "../../components/AppTab/type";
 import AppTab from "../../components/AppTab/AppTab";
-import seriesApis from "../../api_dev/series.api";
-import categoryApis from "../../api_dev/category.api";
-import { CategoryNode } from "../../data/categories/type";
+
 import AppCategoryCascader, {
   findCategoryPath,
 } from "../../components/AppCategoryCascader/AppCategoryCascader";
-import { getObjectFromRowFormData } from "../../util";
+
 import { useMessageContext } from "../../providers/MessageContextProvider";
 import SkuListPage from "../SkuListPage/SkuListPage";
-import AppAttrList from "../../components/AppAttrList/AppAttrList";
+
 import AppAssetList from "../../components/AppAssetList/AppAssetList";
 import { AppRoutes, queryParamKey } from "../../routes";
 import AppButton from "../../components/AppButton/AppButton";
 import AppDropDownList from "../../components/AppDropDownList/AppDropDownList";
-import pclApis from "../../api_dev/pcl.api";
-import attrApis from "../../api_dev/attrs.api";
-import productApis from "../../api_dev/product.api";
+
 import {
   getProductDetailApi,
-  ProductAttr,
   ProductDetail,
   updateProductCategoryApi,
   updateProductNameDescApi,
@@ -32,6 +32,7 @@ import { GetPclEntriesApi } from "../../api/pcl.api";
 import AppImageUploader from "../../components/AppImageUploader/AppImageUploader";
 import { uploadAssetApi } from "../../api/asset.api";
 import { ASSET_TABS, layout } from "../../constant";
+import ProductAttrList from "./ProductAttrList";
 const initialSeries = {
   pr_cd: "",
   pcl: {
@@ -58,9 +59,9 @@ const SeriesDetailPage = () => {
 
   const { setMessage } = useMessageContext();
   const [series, setseries] = useState<ProductDetail>(initialSeries);
-  const [attrList, setattrList] = useState<ProductAttr[]>([]);
 
-  let { series_cd } = useParams();
+  const { series_cd, sku_cd } = useParams();
+  const pr_cd = series_cd ?? sku_cd;
   const navigate = useNavigate();
   const [categorylist, setcategorylist] = useState<CategoryTree[]>([]);
   const [selectedCategoryKeys, setselectedCategoryKeys] = useState<string[]>(
@@ -78,19 +79,19 @@ const SeriesDetailPage = () => {
   >([]);
   const [imgFile, setimgFile] = useState<File | null>(null);
   const [dropdownOpen, setdropdownOpen] = useState(false);
-
+  const location = useLocation();
   const [imgUrl, setimgUrl] = useState<string>("");
   useEffect(() => {
     getSeries();
+    setactiveTabKey(series_cd ? "0" : "1");
     return () => {
       setcategorylist([]);
       setselectedCategoryKeys([]);
       setdropDownOptions([]);
       setseries(initialSeries);
-      setattrList([]);
       setimgUrl("");
     };
-  }, []);
+  }, [location.pathname]);
 
   useEffect(() => {
     const tabKey = searchParams.get(queryParamKey.tab);
@@ -123,31 +124,42 @@ const SeriesDetailPage = () => {
   }, [selectedCategoryKeys, categorylist]);
 
   const getSeries = async () => {
-    const res = await getProductDetailApi({ pr_cd: series_cd });
+    const res = await getProductDetailApi({ pr_cd: series_cd ?? sku_cd });
     if (res.result !== "success") return;
 
-    if (res.data.asset) {
-      setimgUrl(res.data.asset.ast_img);
-    }
+    setimgUrl(res.data.img_url);
     setseries(res.data.product);
-    setattrList(res.data.attrvalues);
   };
 
   const tabdata: AppTabProps = useMemo(() => {
+    let data = [
+      {
+        key: "0",
+        label: "SKU",
+        content: <SkuListPage selectedPclCd={series?.pcl_cd ?? ""} />,
+      },
+      {
+        key: "1",
+        label: "項目",
+        content: (
+          <ProductAttrList
+            updateDetail={getSeries}
+            selectedPclCd={series?.pcl_cd ?? ""}
+          />
+        ),
+      },
+      {
+        key: "2",
+        label: "アセット",
+        content: <AppAssetList product_cd={series_cd ?? sku_cd ?? ""} />,
+      },
+    ];
+    if (!series_cd) {
+      data.shift();
+    }
+
     return {
-      data: [
-        { key: "0", label: "SKU", content: <SkuListPage /> },
-        {
-          key: "1",
-          label: "項目",
-          content: <AppAttrList updateDetail={getSeries} attrList={attrList} />,
-        },
-        {
-          key: "2",
-          label: "アセット",
-          content: series && <AppAssetList product_cd={series_cd} />,
-        },
-      ],
+      data,
     };
   }, [series]);
 
@@ -214,7 +226,7 @@ const SeriesDetailPage = () => {
       }
       const assetPromise = uploadAssetApi({
         body: formData,
-        pr_cd: series_cd,
+        pr_cd: series_cd ?? sku_cd,
         type: ASSET_TABS.IMAGE,
         im: "1",
       });
@@ -273,7 +285,7 @@ const SeriesDetailPage = () => {
               <div className="w-full h-[150px] flex justify-center mt-3">
                 <AppImageUploader
                   onFileSelect={handleImgUpload}
-                  imagePath={`http://localhost:3000/${imgUrl}?d=${Math.random()}`}
+                  imagePath={`${imgUrl}?d=${Math.random()}`}
                   acceptExtensions={[".jpg", ".png", ".pdf"]}
                 />
               </div>
@@ -284,7 +296,7 @@ const SeriesDetailPage = () => {
                 <input
                   className="border border-slate-500 p-1 px-2"
                   name="name"
-                  value={series.pr_name}
+                  value={series?.pr_name}
                   onChange={(e) => {
                     setseries((pre) => ({
                       ...pre,
@@ -300,7 +312,7 @@ const SeriesDetailPage = () => {
                 <textarea
                   className="border border-slate-500 p-1 px-2 w-full"
                   name="description"
-                  value={series.pr_description}
+                  value={series?.pr_description}
                   onChange={(e) => {
                     setseries((pre) => ({
                       ...pre,
@@ -322,7 +334,7 @@ const SeriesDetailPage = () => {
                     className="border border-slate-500 p-1 px-2 w-full text-left"
                     onClick={handleClick}
                   >
-                    {series.pcl.pcl_name}
+                    {series?.pcl.pcl_name}
                   </button>
                 </AppDropDownList>
               </div>

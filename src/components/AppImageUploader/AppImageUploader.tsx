@@ -94,7 +94,7 @@ const AppImageUploader = ({
         cursor: "pointer",
       }}
     >
-      {hover && (
+      {/* {hover && (
         <div className="absolute w-full h-full top-0 left-0 flex justify-center items-center ">
           <div className="relative w-full h-full">
             <div className="w-full h-full absolute bg-black opacity-70"></div>
@@ -103,7 +103,7 @@ const AppImageUploader = ({
             </div>
           </div>
         </div>
-      )}
+      )} */}
       {dragging && (
         <div className="absolute w-full h-full top-0 left-0 flex justify-center items-center ">
           <div className="relative w-full h-full">

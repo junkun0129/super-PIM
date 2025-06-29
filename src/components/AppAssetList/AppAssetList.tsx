@@ -4,14 +4,13 @@ import AppAcordion, {
   AppAcordionProps,
 } from "../../components/AppAcordion/AppAcordion";
 import { ASSET_TAB_TO_TEXT, ASSET_TABS } from "../../constant";
-import asseApis, { Asset } from "../../api_dev/assets.api";
+
 import { useParams } from "react-router-dom";
 import AppAsetBox from "../../components/AppAssetBox/AppAsetBox";
 type Props = {
   product_cd: string;
 };
 const AppAssetList = ({ product_cd }: Props) => {
-  const { createAssetBox, getAllAssetBoxesApi, getProductAssetsApi } = asseApis;
   const baseItems: AppAcordionProps["items"] = [
     {
       key: ASSET_TABS.IMAGE,
@@ -46,59 +45,18 @@ const AppAssetList = ({ product_cd }: Props) => {
   ];
 
   const [items, setitems] = useState<AppAcordionProps["items"]>(baseItems);
-  const [assets, setassets] = useState<Asset[]>([]);
+  const [assets, setassets] = useState([]);
   useEffect(() => {
     updateAssets();
   }, []);
 
   useEffect(() => {
-    updateItems(assets);
+    updateItems();
   }, [assets]);
 
-  const updateAssets = async () => {
-    const res = await getAllAssetBoxesApi();
-    if (res.result !== "success") return;
-    const { data: boxData } = res;
-    const assetRes = await getProductAssetsApi({ product_cd });
-    if (assetRes.result !== "success") return;
-    const { data: assetData } = assetRes;
-    let newAssets: Asset[] = boxData.map((item) => {
-      return {
-        asset: null,
-        box: item,
-      };
-    });
+  const updateAssets = async () => {};
 
-    newAssets = newAssets.map((asset) => {
-      const filtered = assetData.filter(
-        (roAsser) => roAsser.no === asset.box.no
-      );
-
-      if (filtered.length) {
-        return { asset: filtered[0], box: asset.box };
-      }
-      return asset;
-    });
-
-    setassets(newAssets);
-  };
-
-  const updateItems = (newAsset: Asset[]) => {
-    const newItems = baseItems.map((item, i) => {
-      const assets = newAsset.filter((as) => as.box.type === item.key);
-      return {
-        ...item,
-        children: (
-          <div key={i + "-accoritems"} className="flex flex-wrap">
-            {assets.map((asset) => (
-              <AppAsetBox acordionKey={item.key} asset={asset} />
-            ))}
-          </div>
-        ),
-      };
-    });
-    setitems(newItems);
-  };
+  const updateItems = () => {};
   return (
     <div className=" overflow-auto">
       <AppAcordion items={items} />

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import skuApis from "../../api_dev/sku.api";
-import skuApi from "../../api_dev/sku.api";
+
 import { Column } from "../../components/AppTable/type";
 import AppTable from "../../components/AppTable/AppTable";
 import { Flag } from "../../common";
@@ -8,19 +7,24 @@ import { C_REQ_HEADER_SKU_LIST, PRODUCT_SAIYOUS } from "../../constant";
 import AppDropDownList from "../../components/AppDropDownList/AppDropDownList";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { AppRoutes, paramHolder, queryParamKey } from "../../routes";
-import { getProductListApi } from "../../api/product.api";
+import { AttrFilter, getProductListApi } from "../../api/product.api";
 import {
   addHeaderApi,
   getHeadersApi,
   updateHeaderOrderApi,
   updateWidthApi,
 } from "../../api/header.api";
-import SkuTableHeader from "./SkuTableHeader";
+import AppHeader from "../../components/AppHeader/AppHeader";
+import AppTableHeader from "../SeriesListPage.tsx/AppTableHeader";
 type Row = {
   [key: string]: string;
 };
 
-const SkuListPage = () => {
+type Props = {
+  selectedPclCd?: string;
+};
+
+const SkuListPage = ({ selectedPclCd }: Props) => {
   const [columns, setcolumns] = useState<Column<Row>[]>([]);
   let { series_cd } = useParams();
   const [dataSource, setdataSource] = useState<Row[]>([]);
@@ -63,6 +67,7 @@ const SkuListPage = () => {
       kw: keywords,
       ct: categoryKeys.length ? categoryKeys[categoryKeys.length - 1] : "",
       id: isDeleted,
+      sd: series_cd ?? "",
     });
 
     const headerPromise = getHeadersApi({
@@ -84,9 +89,9 @@ const SkuListPage = () => {
         newRow[key] = "";
       });
 
-      if (sku.attrvalue.length) {
+      if (!!sku.attrvalue.length) {
         sku.attrvalue.map((attr) => {
-          conbinedRow[attr.atr_cd] = attr.atv_value;
+          newRow[attr.atr_cd] = attr.atv_value;
         });
       }
 
@@ -145,7 +150,7 @@ const SkuListPage = () => {
   };
 
   const handleColumnDrop = async (active_cd: string, over_cd: string) => {
-    const res = await updateHeaderOrderApi({
+    await updateHeaderOrderApi({
       body: {
         active_cd,
         over_cd,
@@ -155,12 +160,22 @@ const SkuListPage = () => {
   };
   return (
     <div>
-      <SkuTableHeader
+      <AppTableHeader
         updateList={() => {}}
         selectedCategoryKeys={categoryKeys}
         keyword={keywords}
         setSelectedCategoryKeys={setcategoryKeys}
         setKeyword={setkeywords}
+        selectedKeys={[]}
+        setSelectedKeys={function (keys: string[]): void {
+          throw new Error("Function not implemented.");
+        }}
+        selectedPclCd={selectedPclCd}
+        isSeries={false}
+        selectedFilters={[]}
+        setSelectedFilters={function (filters: AttrFilter[]): void {
+          throw new Error("Function not implemented.");
+        }}
       />
       <AppTable
         key="sku"

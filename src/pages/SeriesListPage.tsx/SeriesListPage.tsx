@@ -1,10 +1,9 @@
 import React, { ReactNode, useContext, useEffect, useState } from "react";
 import AppTable from "../../components/AppTable/AppTable";
 import { Column } from "../../components/AppTable/type";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { getSeriesImg, isoToDateText } from "../../util";
-import { SeriesList } from "../../api_dev/series.api";
-import seriesApi from "../../api_dev/series.api";
+
 import { Flag } from "../../common";
 import { useMessageContext } from "../../providers/MessageContextProvider";
 import { PRODUCT_SAIYOUS } from "../../constant";
@@ -43,13 +42,14 @@ const SeriesListPage = () => {
   const [categoryKeys, setcategoryKeys] = useState<string[]>([]);
   const [workspace, setworkspace] = useState("");
   const [keywords, setkeywords] = useState("");
+  let { series_cd } = useParams();
   const [selectedFilters, setSelectedFilters] = useState<AttrFilter[]>([]);
   const [orderAttr, setorderAttr] = useState("pr_hinban");
   const [order, setorder] = useState<"asc" | "desc">("asc");
   const [isDeleted, setisDeleted] = useState<Flag>("0");
   const { setMessage } = useMessageContext();
   const [total, setTotal] = useState(0);
-  const { getSeriesListApi } = seriesApi;
+
   const [query, setQuery] = useSearchParams();
   const navigate = useNavigate();
   const [selectedKeys, setselectedKeys] = useState<string[]>([]);
@@ -88,6 +88,7 @@ const SeriesListPage = () => {
               ? categoryKeys[categoryKeys.length - 1]
               : "",
             id: isDeleted,
+            sd: series_cd ?? "",
             body: selectedFilters,
           })
         : await getProductListApi({
@@ -98,6 +99,7 @@ const SeriesListPage = () => {
             ob: orderAttr,
             or: order,
             kw: keywords,
+            sd: series_cd ?? "",
             ct: categoryKeys.length
               ? categoryKeys[categoryKeys.length - 1]
               : "",
@@ -106,13 +108,13 @@ const SeriesListPage = () => {
     if (result !== "success") return setMessage("リストの取得に失敗しました");
     const newDataSource: Row[] = data.map((pr, i) => {
       const imgPath = pr.asset.length
-        ? `${import.meta.env.VITE_BASE_URL}/${mainAssetBoxKey}/${pr.pr_cd}.${
+        ? `${import.meta.env.VITE_BASE_URL}/${mainAssetBoxKey}/${pr.pr_cd}${
             pr.asset[0].ast_ext
           }`
         : "";
       return {
         cd: pr.pr_cd,
-        img: <img src={imgPath} />,
+        img: <img width={30} height={30} src={imgPath} />,
         hinban: pr.pr_hinban,
         name: pr.pr_name,
         pcl_name: pr.pcl.pcl_name,

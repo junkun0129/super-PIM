@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Column } from "../../../components/AppTable/type";
 import AppTable from "../../../components/AppTable/AppTable";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import pclApis from "../../../api_dev/pcl.api";
+
 import PclDetailPage from "../../PclDetailPage/PclDetailPage";
 import { queryParamKey } from "../../../routes";
 import { GetPclListApi } from "../../../api/pcl.api";
@@ -30,7 +30,7 @@ const PclManagePage = () => {
   const [selectedKeys, setselectedKeys] = useState<string[]>([]);
   const [listorder, setlistorder] = useState<"asc" | "desc">("asc");
   const [keyword, setkeyword] = useState<string>("");
-  const { addAttrToPclApi, createPclApi, getPclsApi } = pclApis;
+
   const navigate = useNavigate();
   const [searchParams, setSearchPrams] = useSearchParams();
   const [selectedPclKey, setselectedPclKey] = useState<string | null>(null);

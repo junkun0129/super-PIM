@@ -12,6 +12,7 @@ type GetProductListReq = {
   kw: string;
   ct: string;
   id: string;
+  sd: string;
 };
 type GetProductListApiRes = {
   message: string;
@@ -54,8 +55,9 @@ export const getProductListApi = async ({
   kw,
   ct,
   id,
+  sd,
 }: GetProductListReq): Promise<GetProductListApiRes> => {
-  const url = `/product/list?pg=${pg}&ps=${ps}&or=${or}&kw=${kw}&is=${is}&ws=${ws}&ob=${ob}&ct=${ct}&id=${id}`;
+  const url = `/product/list?pg=${pg}&ps=${ps}&or=${or}&kw=${kw}&is=${is}&ws=${ws}&ob=${ob}&ct=${ct}&id=${id}&sd=${sd}`;
   const res = await fetchRequest(url, "GET");
   return res;
 };
@@ -80,9 +82,10 @@ export const getFiilteredProductListApi = async ({
   kw,
   ct,
   id,
+  sd,
   body,
 }: GetFilteredProductListReq): Promise<GetProductListApiRes> => {
-  const url = `/product/filteredlist?pg=${pg}&ps=${ps}&or=${or}&kw=${kw}&is=${is}&ws=${ws}&ob=${ob}&ct=${ct}&id=${id}`;
+  const url = `/product/filteredlist?pg=${pg}&ps=${ps}&or=${or}&kw=${kw}&is=${is}&ws=${ws}&ob=${ob}&ct=${ct}&id=${id}&sd=${sd}`;
   const res = await fetchRequest(url, "POST", body);
   return res;
 };
@@ -94,6 +97,7 @@ type CreateProductApiReq = {
     pr_hinban: string;
     ctg_cd: string;
     pcl_cd: string;
+    pr_series_cd: string;
     attrvalues: { atr_cd: string; atv_value: string }[];
   };
 };
@@ -129,24 +133,7 @@ export const checkProductApi = async ({
 type GetProductDetailApiReq = {
   pr_cd: string;
 };
-export type ProductAttr = {
-  atv_cd: string;
-  atv_value: string;
-  attr: {
-    atr_cd: string;
-    atr_name: string;
-    atr_is_with_unit: string;
-    atr_unit: string;
-    atr_control_type: string;
-    atr_select_list: string;
-    atr_max_length?: number;
-    atr_not_null: string;
-    attrpcl: {
-      atp_is_common: string;
-      atp_order: number;
-    }[];
-  };
-};
+
 export type ProductDetail = {
   pr_cd: string;
   pcl: {
@@ -172,10 +159,7 @@ type GetProductDetailApiRes = {
   result: string;
   data: {
     product: ProductDetail;
-    attrvalues: ProductAttr[];
-    asset: {
-      ast_img: string;
-    };
+    img_url: string;
   };
 };
 export const getProductDetailApi = async ({

@@ -3,14 +3,12 @@ import { useParams, useSearchParams } from "react-router-dom";
 import AppTable from "../../components/AppTable/AppTable";
 import { Column } from "../../components/AppTable/type";
 import AppModal from "../../components/AppModal/AppModal";
-import pclApis from "../../api_dev/pcl.api";
-import attrApis from "../../api_dev/attrs.api";
 
 import { useMessageContext } from "../../providers/MessageContextProvider";
 import { AttrPclTable } from "../../data/attrpcls/type";
 import AppDropDownList from "../../components/AppDropDownList/AppDropDownList";
 import { arrayMove, getObjectFromRowFormData } from "../../util";
-import mediaApi from "../../api_dev/media.api";
+
 import { MediaTable } from "../../data/medias/medias";
 import AppTab from "../../components/AppTab/AppTab";
 import { queryParamKey } from "../../routes";
@@ -35,8 +33,6 @@ const dropdownOption: { cd: string; label: string }[] = [
   { cd: "1", label: "削除" },
 ];
 const PclDetailPage = () => {
-  const { getPclsAttrsApi, addAttrToPclApi, updatePclAttrApi } = pclApis;
-
   const { setMessage } = useMessageContext();
   const [currentPage, setcurrentPage] = useState(1);
   const [pagination, setpagination] = useState(10);
@@ -44,7 +40,7 @@ const PclDetailPage = () => {
   const [dataSource, setdataSource] = useState<Row[]>([]);
   const [searchParams, setSearchPrams] = useSearchParams();
   const pcl_cd = searchParams.get(queryParamKey.pclDetail);
-  const { getAllMediaApi } = mediaApi;
+
   const [alterValueOptions, setalterValueOptions] = useState<
     { cd: string; label: string }[]
   >([]);
@@ -60,54 +56,49 @@ const PclDetailPage = () => {
     getPclDetail(media_cd, pcl_cd);
   }, [searchParams]);
 
-  const getMedialist = async () => {
-    const res = await getAllMediaApi();
-    if (res.result !== "success") return;
-
-    setmediaList([{ cd: "0", name: "商品管理" }, ...res.data]);
-  };
+  const getMedialist = async () => {};
 
   const getPclDetail = async (media_cd: string, pcl_cd: string) => {
-    const res = await getPclsAttrsApi({ body: { media_cd, pcl_cd } });
-    if (res.result !== "success") setMessage("失敗しました");
-    const newAlterValueOptions = res.data.map((item) => ({
-      cd: item.attr_cd,
-      label: item.name,
-    }));
-    setalterValueOptions(newAlterValueOptions);
-    const newDataSource: Row[] = res.data
-      .sort((a, b) => parseInt(a.order) - parseInt(b.order))
-      .map((item) => ({
-        cd: item.cd,
-        name: item.name,
-        alter_name: (
-          <AlterNameCell
-            key={item.cd + media_cd}
-            cd={item.cd}
-            defaultValue={item.alter_name}
-          />
-        ),
-        alter_value: (
-          <AlterValueInput
-            inputName={item.cd + "-alter_value"}
-            options={[
-              ...newAlterValueOptions,
-              { cd: "text", label: "テキスト" },
-            ]}
-            defaultValue={item.alter_value}
-          />
-        ),
-        order: <OrderCell order={item.order} cd={item.cd} />,
-        is_show: (
-          <input
-            defaultChecked={item.is_show === "1" ? true : false}
-            name={item.cd + "-is_show"}
-            key={item.cd + media_cd}
-            type="checkbox"
-          />
-        ),
-      }));
-    setdataSource(newDataSource);
+    // const res = await getPclsAttrsApi({ body: { media_cd, pcl_cd } });
+    // if (res.result !== "success") setMessage("失敗しました");
+    // const newAlterValueOptions = res.data.map((item) => ({
+    //   cd: item.attr_cd,
+    //   label: item.name,
+    // }));
+    // setalterValueOptions(newAlterValueOptions);
+    // const newDataSource: Row[] = res.data
+    //   .sort((a, b) => parseInt(a.order) - parseInt(b.order))
+    //   .map((item) => ({
+    //     cd: item.cd,
+    //     name: item.name,
+    //     alter_name: (
+    //       <AlterNameCell
+    //         key={item.cd + media_cd}
+    //         cd={item.cd}
+    //         defaultValue={item.alter_name}
+    //       />
+    //     ),
+    //     alter_value: (
+    //       <AlterValueInput
+    //         inputName={item.cd + "-alter_value"}
+    //         options={[
+    //           ...newAlterValueOptions,
+    //           { cd: "text", label: "テキスト" },
+    //         ]}
+    //         defaultValue={item.alter_value}
+    //       />
+    //     ),
+    //     order: <OrderCell order={item.order} cd={item.cd} />,
+    //     is_show: (
+    //       <input
+    //         defaultChecked={item.is_show === "1" ? true : false}
+    //         name={item.cd + "-is_show"}
+    //         key={item.cd + media_cd}
+    //         type="checkbox"
+    //       />
+    //     ),
+    //   }));
+    // setdataSource(newDataSource);
   };
 
   const handleDrop = ({
@@ -162,15 +153,15 @@ const PclDetailPage = () => {
         return { ...item, is_show: "1" };
       }
     });
-    const res = await updatePclAttrApi({
-      body: {
-        attrpcls: attrpcls as AttrPclTable[],
-        media_cd,
-      },
-    });
+    // const res = await updatePclAttrApi({
+    //   body: {
+    //     attrpcls: attrpcls as AttrPclTable[],
+    //     media_cd,
+    //   },
+    // });
 
-    if (res.result !== "success") return;
-    setMessage("項目情報が更新されました");
+    // if (res.result !== "success") return;
+    // setMessage("項目情報が更新されました");
     getPclDetail(media_cd, pcl_cd);
   };
 

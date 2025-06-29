@@ -19,7 +19,7 @@ type AppTableHeaderProps = {
   setSelectedCategoryKeys: (keys: string[]) => void;
   setKeyword: (e: string) => void;
   isSeries?: boolean;
-  selectedCd?: string;
+  selectedPclCd?: string;
 };
 
 // 以上、以下、より大きい、よりちいさい、等しい、等しくない、を含む、を含まない
@@ -32,12 +32,13 @@ const AppTableHeader = ({
   selectedFilters,
   setSelectedFilters,
   isSeries = false,
-  selectedCd,
+  selectedPclCd,
   selectedKeys,
   setSelectedKeys,
 }: AppTableHeaderProps) => {
   const [isModalOpen, setisModalOpen] = useState<boolean>(false);
   const [isDeleteModalOpen, setisDeleteModalOpen] = useState<boolean>(false);
+
   return (
     <div className="w-full h-[50px] rounded-sm my-2 mb-6 bg-white shadow-md flex items-center p-3 justify-between">
       <div className="flex items-center">
@@ -46,14 +47,16 @@ const AppTableHeader = ({
           placeHolder="キーワード検索"
         />
         <AttrFilterButton
-          selectedPclCd={""}
+          selectedPclCd={selectedPclCd}
           selectedFilters={selectedFilters}
           setSelectedFilters={setSelectedFilters}
         />
-        <CategoryCascaderButton
-          selectedKeys={selectedCategoryKeys}
-          setSelectedKeys={setSelectedCategoryKeys}
-        />
+        {!selectedPclCd && (
+          <CategoryCascaderButton
+            selectedKeys={selectedCategoryKeys}
+            setSelectedKeys={setSelectedCategoryKeys}
+          />
+        )}
       </div>
       <div className="flex items-center">
         <AppButton
@@ -73,6 +76,7 @@ const AppTableHeader = ({
         isSeries={isSeries}
         onClose={() => setisModalOpen(false)}
         updateList={updateList}
+        selectedPclCd={selectedPclCd}
       />
       <ProductDeleteModal
         open={isDeleteModalOpen}

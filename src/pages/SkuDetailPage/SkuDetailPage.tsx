@@ -6,7 +6,7 @@ import skuApi from "../../api_dev/sku.api";
 import { PRODUCT_SAIYOUS } from "../../constant";
 import PclButton from "./PclButton";
 import { AppTabProps } from "../../components/AppTab/type";
-import AppAttrList from "../../components/AppAttrList/AppAttrList";
+import AppAttrList from "../SeriesDetail/ProductAttrList";
 import AppAssetList from "../../components/AppAssetList/AppAssetList";
 import AppTab from "../../components/AppTab/AppTab";
 import LabelButton from "./LabelButton";

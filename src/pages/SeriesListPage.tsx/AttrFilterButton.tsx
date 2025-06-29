@@ -13,7 +13,7 @@ import {
   operandsLabelForText,
 } from "../../constant";
 type Props = {
-  selectedPclCd: string;
+  selectedPclCd?: string;
   selectedFilters: AttrFilter[];
   setSelectedFilters: (filters: AttrFilter[]) => void;
 };
