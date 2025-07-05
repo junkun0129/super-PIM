@@ -14,9 +14,9 @@ const AppTab = ({ data, activeId: activeIdProp, onChange }: AppTabProps) => {
     onChange(id);
   };
   return (
-    <div className="w-full h-full px-6">
+    <div className="w-full h-full px-6 ">
       {/* Label */}
-      <div className="flex">
+      <div className="flex w-full h-[12%]">
         {data.map((node, i) => (
           <div
             key={i}
@@ -37,7 +37,7 @@ const AppTab = ({ data, activeId: activeIdProp, onChange }: AppTabProps) => {
       </div>
 
       {/* Content */}
-      <div className="w-full f-full relative">
+      <div className="w-full h-[88%] relative">
         {data.map((node, i) => (
           <div
             style={{

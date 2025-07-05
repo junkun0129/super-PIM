@@ -13,7 +13,7 @@ const AppAcordion = ({ items }: AppAcordionProps) => {
     }
   };
   return (
-    <div>
+    <div className=" w-full h-full ">
       {items.map((item, i) => {
         return (
           <div

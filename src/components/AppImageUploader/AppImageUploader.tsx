@@ -1,15 +1,19 @@
-import { useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 
 type Props = {
   onFileSelect: (file: File) => void;
   acceptExtensions: string[]; // 例: ['.jpg', '.png', '.pdf']
   imagePath: string;
+  className?: string;
+  children?: ReactNode;
 };
 
 const AppImageUploader = ({
   onFileSelect,
   acceptExtensions,
   imagePath,
+  children,
+  className,
 }: Props) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -86,33 +90,41 @@ const AppImageUploader = ({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className="w-full h-full relative"
-      style={{
-        border: "1px solid gray",
-        padding: "20px",
-        textAlign: "center",
-        backgroundColor: dragging ? "#f0f8ff" : "#fff",
-        cursor: "pointer",
-      }}
+      style={
+        children
+          ? {}
+          : {
+              border: "1px solid gray",
+              padding: "20px",
+              textAlign: "center",
+              backgroundColor: dragging ? "#f0f8ff" : "#fff",
+              cursor: "pointer",
+            }
+      }
     >
-      {/* {hover && (
-        <div className="absolute w-full h-full top-0 left-0 flex justify-center items-center ">
-          <div className="relative w-full h-full">
-            <div className="w-full h-full absolute bg-black opacity-70"></div>
-            <div className="w-full h-full absolute flex justify-center items-center text-white">
-              クリックして画像を挿入
+      {!children && (
+        <>
+          {hover && (
+            <div className="absolute w-full h-full top-0 left-0 flex justify-center items-center ">
+              <div className="relative w-full h-full">
+                <div className="w-full h-full absolute bg-black opacity-70"></div>
+                <div className="w-full h-full absolute flex  text-wrap justify-center items-center text-white">
+                  クリックして画像を挿入
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )} */}
-      {dragging && (
-        <div className="absolute w-full h-full top-0 left-0 flex justify-center items-center ">
-          <div className="relative w-full h-full">
-            <div className="w-full h-full absolute bg-black opacity-70"></div>
-            <div className="w-full h-full absolute flex justify-center items-center text-white">
-              ここにドラッグしてください
+          )}
+          {dragging && (
+            <div className="absolute w-full h-full top-0 left-0 flex justify-center items-center ">
+              <div className="relative w-full h-full">
+                <div className="w-full h-full absolute bg-black opacity-70"></div>
+                <div className="w-full h-full absolute flex justify-center items-center text-white">
+                  ここにドラッグしてください
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          )}
+        </>
       )}
       <input
         type="file"
@@ -122,20 +134,22 @@ const AppImageUploader = ({
         accept={acceptExtensions.join(",")}
         onClick={(e) => e.stopPropagation()}
       />
-      <img
-        src={imageSrc}
-        alt="選択された画像"
-        onError={(e) => {
-          // 画像の読み込み失敗時に代替画像を表示
-          const target = e.currentTarget;
-          target.onerror = null;
-          target.src = "http://localhost:3000/nocontent.png";
-        }}
-        width={"100%"}
-        className="w-full h-full"
-        height={"100%"}
-        style={{ objectFit: "contain" }}
-      />
+      {children ?? (
+        <img
+          src={imageSrc}
+          alt="選択された画像"
+          onError={(e) => {
+            // 画像の読み込み失敗時に代替画像を表示
+            const target = e.currentTarget;
+            target.onerror = null;
+            target.src = "http://localhost:3000/nocontent.png";
+          }}
+          width={"100%"}
+          className="w-full h-full"
+          height={"100%"}
+          style={{ objectFit: "contain" }}
+        />
+      )}
     </div>
   );
 };

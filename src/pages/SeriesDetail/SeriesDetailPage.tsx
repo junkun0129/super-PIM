@@ -379,7 +379,7 @@ const SeriesDetailPage = () => {
           </div>
         </div>
         {/* 右側部分 */}
-        <div className="-pt-5 ml-5 w-full rounded-md shadow-lg bg-white">
+        <div className="-pt-5 ml-5 w-full h-full rounded-md shadow-lg ">
           <AppTab
             activeId={activeTabKey}
             onChange={handleTabKey}
