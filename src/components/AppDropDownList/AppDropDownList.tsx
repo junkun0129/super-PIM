@@ -3,7 +3,7 @@ export type AppDropDownListProps = {
   children: ReactNode;
   open?: boolean;
   onSelect?: (e: string) => void;
-  options?: { cd: string; label: string }[];
+  options?: { cd: string; label: ReactNode }[];
   onClose?: () => void;
   className?: string;
 };

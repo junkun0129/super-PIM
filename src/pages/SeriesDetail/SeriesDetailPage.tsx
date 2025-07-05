@@ -151,7 +151,7 @@ const SeriesDetailPage = () => {
       {
         key: "2",
         label: "アセット",
-        content: <AppAssetList product_cd={series_cd ?? sku_cd ?? ""} />,
+        content: <AppAssetList pr_cd={series_cd ?? sku_cd ?? ""} />,
       },
     ];
     if (!series_cd) {

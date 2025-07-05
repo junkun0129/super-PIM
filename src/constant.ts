@@ -557,6 +557,7 @@ const OFFICE_EXTENSIONS = Object.freeze([
   "ppt",
   "pptx",
 ]);
+const PDF_EXTENSIONS = Object.freeze(["pdf"]);
 const PPT_EXTENSIONS = Object.freeze(["ppt", "pptx"]);
 const EXCEL_EXTENSIONS = Object.freeze(["xls", "xlsx"]);
 const WORD_EXTENSIONS = Object.freeze(["doc", "docx"]);
@@ -572,6 +573,7 @@ export const ASSET_TABS = Object.freeze({
 
 export const ASSET_EXT_MAP = {
   [ASSET_TABS.IMAGE]: IMAGE_EXTENSIONS,
+  [ASSET_TABS.PDF]: PDF_EXTENSIONS,
   [ASSET_TABS.VIDEO]: VIDEO_EXTENSIONS,
   [ASSET_TABS.AUDIO]: AUDIO_EXTENSIONS,
   [ASSET_TABS.OFFICE]: OFFICE_EXTENSIONS,
