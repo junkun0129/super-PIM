@@ -98,33 +98,6 @@ const userState = {
   registerBottonView: false,
 };
 
-const LOGIN_URL = "login";
-const REFRESH_TOKEN_URL = "refresh";
-const SKU_DATA_FILTER_URL = "filter_data";
-const MAKERS_DATA_URL = "product_makers";
-const CANCEL_CSV_UPLOAD_URL = "cancel_csv_upload";
-const SERIES_URL = "prdnew_srs";
-const PRODUCT_URL = "prdnew_prd";
-const UPDATE_SERIES_URL = "prdupd_srs/savedata";
-const UPDATE_PRODUCT_URL = "prdupd_prd/savedata";
-
-const MAKERS_SEARCH_URL = "mksch";
-const SUPLIER_SEARCH_URL = "spsch";
-const PRODUCT_SEARCH_URL = "prdsch";
-const SERIES_SEARCH_URL = "srssch";
-const GET_PRODUCT_ATTRIBUTES_URL = "prdupd_srs/getform";
-
-const BASIC_CHANNEL_CODE = 0;
-const PRODUCT_SKU_CODE = "PRD_CD";
-const ACCESS_TOKEN_STRING = "xcms-pim-tkn";
-const REFRESH_TOKEN_STRING = "xcms-pim-refresh-tkn";
-const LOAD_STEP = 50;
-
-const COMMON_PRODUCT_CLASSIFICATION = {
-  cd: "00000000000000000000000000",
-  name: "全分類共通",
-};
-
 export const operandsLabelForNumberAndDate = {
   より大きい: "0",
   より小さい: "1",
@@ -596,6 +569,14 @@ export const ASSET_TABS = Object.freeze({
   OFFICE: "4",
   OTHER: "5",
 });
+
+export const ASSET_EXT_MAP = {
+  [ASSET_TABS.IMAGE]: IMAGE_EXTENSIONS,
+  [ASSET_TABS.VIDEO]: VIDEO_EXTENSIONS,
+  [ASSET_TABS.AUDIO]: AUDIO_EXTENSIONS,
+  [ASSET_TABS.OFFICE]: OFFICE_EXTENSIONS,
+  [ASSET_TABS.OTHER]: [],
+};
 
 export const ASSET_TAB_TO_TEXT = Object.freeze({
   IMAGE: "画像",
